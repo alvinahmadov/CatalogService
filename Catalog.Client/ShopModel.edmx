@@ -1,0 +1,882 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+	<!-- EF Runtime content -->
+	<edmx:Runtime>
+		<!-- SSDL content -->
+		<edmx:StorageModels>
+			<Schema Namespace="Catalog.Common.Service.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2012" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+				<EntityContainer Name="CatalogCommonServiceStoreContainer">
+					<EntitySet Name="Locations" EntityType="Catalog.Common.Service.Store.Locations" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="Products" EntityType="Catalog.Common.Service.Store.Products" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="ProductCategories" EntityType="Catalog.Common.Service.Store.ProductCategories" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="ProductPhotoes" EntityType="Catalog.Common.Service.Store.ProductPhotoes" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="ProductSubcategories" EntityType="Catalog.Common.Service.Store.ProductSubcategories" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="TransactionHistories" EntityType="Catalog.Common.Service.Store.TransactionHistories" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="ShoppingCartItems" EntityType="Catalog.Common.Service.Store.ShoppingCartItems" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="SpecialOffers" EntityType="Catalog.Common.Service.Store.SpecialOffers" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="SpecialOfferProducts" EntityType="Catalog.Common.Service.Store.SpecialOfferProducts" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="Users" EntityType="Catalog.Common.Service.Store.Users" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="ProductInventories" EntityType="Catalog.Common.Service.Store.ProductInventories" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="ShoppingCarts" EntityType="Catalog.Common.Service.Store.ShoppingCarts" store:Type="Tables" Schema="dbo" />
+					<EntitySet Name="Settings" EntityType="Catalog.Common.Service.Store.Settings" store:Type="Tables" Schema="dbo" />
+					<AssociationSet Name="FK_Product_ProductSubcategory_ProductSubcategoryID" Association="Catalog.Common.Service.Store.FK_Product_ProductSubcategory_ProductSubcategoryID">
+						<End Role="ProductSubcategory" EntitySet="ProductSubcategories" />
+						<End Role="Product" EntitySet="Products" />
+					</AssociationSet>
+					<AssociationSet Name="FK_SpecialOfferProduct_Product_ProductID" Association="Catalog.Common.Service.Store.FK_SpecialOfferProduct_Product_ProductID">
+						<End Role="Product" EntitySet="Products" />
+						<End Role="SpecialOfferProduct" EntitySet="SpecialOfferProducts" />
+					</AssociationSet>
+					<AssociationSet Name="FK_ProductSubcategory_ProductCategory_ProductCategoryID" Association="Catalog.Common.Service.Store.FK_ProductSubcategory_ProductCategory_ProductCategoryID">
+						<End Role="ProductCategory" EntitySet="ProductCategories" />
+						<End Role="ProductSubcategory" EntitySet="ProductSubcategories" />
+					</AssociationSet>
+					<AssociationSet Name="FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" Association="Catalog.Common.Service.Store.FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID">
+						<End Role="SpecialOffer" EntitySet="SpecialOffers" />
+						<End Role="SpecialOfferProduct" EntitySet="SpecialOfferProducts" />
+					</AssociationSet>
+					<AssociationSet Name="ProductPhotoProduct" Association="Catalog.Common.Service.Store.ProductPhotoProduct">
+						<End Role="ProductPhoto" EntitySet="ProductPhotoes" />
+						<End Role="Product" EntitySet="Products" />
+					</AssociationSet>
+					<AssociationSet Name="ProductProductInventory" Association="Catalog.Common.Service.Store.ProductProductInventory">
+						<End Role="Product" EntitySet="Products" />
+						<End Role="ProductInventory" EntitySet="ProductInventories" />
+					</AssociationSet>
+					<AssociationSet Name="ShoppingCartShoppingCartItem" Association="Catalog.Common.Service.Store.ShoppingCartShoppingCartItem">
+						<End Role="ShoppingCart" EntitySet="ShoppingCarts" />
+						<End Role="ShoppingCartItem" EntitySet="ShoppingCartItems" />
+					</AssociationSet>
+					<AssociationSet Name="UserSpecialOfferProduct" Association="Catalog.Common.Service.Store.UserSpecialOfferProduct">
+						<End Role="User" EntitySet="Users" />
+						<End Role="SpecialOfferProduct" EntitySet="SpecialOfferProducts" />
+					</AssociationSet>
+					<AssociationSet Name="ShoppingCartItemProduct" Association="Catalog.Common.Service.Store.ShoppingCartItemProduct">
+						<End Role="ShoppingCartItem" EntitySet="ShoppingCartItems" />
+						<End Role="Product" EntitySet="Products" />
+					</AssociationSet>
+				</EntityContainer>
+				<EntityType Name="Locations">
+					<Key>
+						<PropertyRef Name="LocationID" />
+					</Key>
+					<Property Name="LocationID" Type="smallint" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="50" />
+					<Property Name="CostRate" Type="decimal" Nullable="false" Precision="10" Scale="4" />
+					<Property Name="Availability" Type="decimal" Nullable="false" Precision="8" Scale="2" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="Products">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="ProductID" Type="int" Nullable="false" />
+					<Property Name="ProductSubcategoryID" Type="int" Nullable="true" />
+					<Property Name="ArticleNumber" Type="nvarchar(max)" Nullable="false" />
+					<Property Name="Code" Type="nvarchar(max)" Nullable="false" />
+					<Property Name="Brand" Type="nvarchar(max)" Nullable="false" />
+					<Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="100" />
+					<Property Name="Price" Type="decimal" Nullable="false" Precision="19" Scale="2" />
+					<Property Name="Description" Type="nvarchar" Nullable="false" DefaultValue="&quot;&quot;" MaxLength="400" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="ProductCategories">
+					<Key>
+						<PropertyRef Name="ProductCategoryID" />
+					</Key>
+					<Property Name="ProductCategoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="50" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="ProductPhotoes">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="int" Nullable="false" />
+					<Property Name="ProductID" Type="int" Nullable="false" />
+					<Property Name="FileName" Type="nvarchar" Nullable="true" MaxLength="50" />
+					<Property Name="ThumbNailPhoto" Type="varbinary(max)" Nullable="true" />
+					<Property Name="LargePhoto" Type="varbinary(max)" Nullable="true" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="ProductSubcategories">
+					<Key>
+						<PropertyRef Name="ProductSubcategoryID" />
+					</Key>
+					<Property Name="ProductSubcategoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="ProductCategoryID" Type="int" Nullable="false" />
+					<Property Name="ChildSubcategoryID" Type="int" Nullable="true" />
+					<Property Name="Name" Type="nvarchar" Nullable="false" MaxLength="50" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="TransactionHistories">
+					<Key>
+						<PropertyRef Name="TransactionID" />
+					</Key>
+					<Property Name="TransactionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="TransactionDate" Type="datetime" Nullable="false" />
+					<Property Name="Quantity" Type="int" Nullable="false" />
+					<Property Name="TotalCost" Type="decimal" Nullable="false" Precision="19" Scale="2" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="ShoppingCartItems">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="int" Nullable="false" />
+					<Property Name="ProductID" Type="int" Nullable="false" />
+					<Property Name="ShoppingCartID" Type="int" Nullable="false" />
+					<Property Name="Quantity" Type="int" Nullable="false" DefaultValue="0" />
+					<Property Name="UnitPrice" Type="decimal" Nullable="false" Precision="19" Scale="2" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="DateCreated" Type="datetime" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="SpecialOffers">
+					<Key>
+						<PropertyRef Name="SpecialOfferID" />
+					</Key>
+					<Property Name="SpecialOfferID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="Description" Type="nvarchar" Nullable="false" DefaultValue="&quot;&quot;" MaxLength="255" />
+					<Property Name="DiscountPct" Type="decimal" Nullable="false" Precision="19" Scale="2" />
+					<Property Name="Type" Type="nvarchar" Nullable="false" DefaultValue="&quot;&quot;" MaxLength="50" />
+					<Property Name="Category" Type="nvarchar" Nullable="false" DefaultValue="&quot;&quot;" MaxLength="50" />
+					<Property Name="StartDate" Type="datetime" Nullable="true" />
+					<Property Name="EndDate" Type="datetime" Nullable="true" />
+					<Property Name="MinQty" Type="int" Nullable="false" DefaultValue="0" />
+					<Property Name="MaxQty" Type="int" Nullable="true" DefaultValue="1000" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="SpecialOfferProducts">
+					<Key>
+						<PropertyRef Name="SpecialOfferID" />
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="SpecialOfferID" Type="int" Nullable="false" />
+					<Property Name="ID" Type="int" Nullable="false" />
+					<Property Name="UserID" Type="int" Nullable="false" DefaultValue="-1" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="Users">
+					<Key>
+						<PropertyRef Name="UserID" />
+					</Key>
+					<Property Name="UserID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="FirstName" Type="nvarchar" Nullable="false" MaxLength="50" />
+					<Property Name="LastName" Type="nvarchar(max)" Nullable="false" />
+					<Property Name="EmailAddress" Type="nvarchar(max)" Nullable="false" />
+					<Property Name="Password" Type="nvarchar(max)" StoreGeneratedPattern="Computed" Nullable="false" />
+				</EntityType>
+				<EntityType Name="ProductInventories">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="int" Nullable="false" />
+					<Property Name="ProductID" Type="int" Nullable="false" />
+					<Property Name="ProductCategoryID" Type="int" Nullable="false" />
+					<Property Name="ProductSubcategoryID" Type="int" Nullable="true" />
+					<Property Name="StockLevel1" Type="nvarchar" Nullable="false" DefaultValue="&quot;-&quot;" MaxLength="5" />
+					<Property Name="StockLevel2" Type="nvarchar" Nullable="false" DefaultValue="&quot;-&quot;" MaxLength="5" />
+					<Property Name="Pack" Type="nvarchar(max)" Nullable="false" DefaultValue="&quot;&quot;" />
+					<Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="ShoppingCarts">
+					<Key>
+						<PropertyRef Name="ShoppingCartID" />
+					</Key>
+					<Property Name="ShoppingCartID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+					<Property Name="Status" Type="tinyint" Nullable="false" />
+					<Property Name="TotalQuantity" Type="int" Nullable="false" DefaultValue="0" />
+					<Property Name="TotalPrice" Type="decimal" Nullable="false" DefaultValue="0" Precision="19" Scale="2" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+					<Property Name="DateCreated" Type="datetime" Nullable="false" />
+				</EntityType>
+				<EntityType Name="Settings">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="int" Nullable="false" />
+					<Property Name="UpdateInterval" Type="int" Nullable="false" />
+					<Property Name="AskConfirmation" Type="bit" Nullable="false" DefaultValue="true" />
+					<Property Name="LoadImage" Type="bit" Nullable="false" DefaultValue="true" />
+					<Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+				</EntityType>
+				<Association Name="FK_Product_ProductSubcategory_ProductSubcategoryID">
+					<End Role="ProductSubcategory" Type="Catalog.Common.Service.Store.ProductSubcategories" Multiplicity="0..1" />
+					<End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="ProductSubcategory">
+							<PropertyRef Name="ProductSubcategoryID" />
+						</Principal>
+						<Dependent Role="Product">
+							<PropertyRef Name="ProductSubcategoryID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="FK_SpecialOfferProduct_Product_ProductID">
+					<End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
+					<End Role="SpecialOfferProduct" Type="Catalog.Common.Service.Store.SpecialOfferProducts" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="SpecialOfferProduct">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="FK_ProductSubcategory_ProductCategory_ProductCategoryID">
+					<End Role="ProductCategory" Type="Catalog.Common.Service.Store.ProductCategories" Multiplicity="1" />
+					<End Role="ProductSubcategory" Type="Catalog.Common.Service.Store.ProductSubcategories" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="ProductCategory">
+							<PropertyRef Name="ProductCategoryID" />
+						</Principal>
+						<Dependent Role="ProductSubcategory">
+							<PropertyRef Name="ProductCategoryID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID">
+					<End Role="SpecialOffer" Type="Catalog.Common.Service.Store.SpecialOffers" Multiplicity="1" />
+					<End Role="SpecialOfferProduct" Type="Catalog.Common.Service.Store.SpecialOfferProducts" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="SpecialOffer">
+							<PropertyRef Name="SpecialOfferID" />
+						</Principal>
+						<Dependent Role="SpecialOfferProduct">
+							<PropertyRef Name="SpecialOfferID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="ProductPhotoProduct">
+					<End Role="ProductPhoto" Type="Catalog.Common.Service.Store.ProductPhotoes" Multiplicity="0..1" />
+					<End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="ProductPhoto">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="ProductProductInventory">
+					<End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
+					<End Role="ProductInventory" Type="Catalog.Common.Service.Store.ProductInventories" Multiplicity="0..1" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="ProductInventory">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="ShoppingCartShoppingCartItem">
+					<End Role="ShoppingCart" Type="Catalog.Common.Service.Store.ShoppingCarts" Multiplicity="1" />
+					<End Role="ShoppingCartItem" Type="Catalog.Common.Service.Store.ShoppingCartItems" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="ShoppingCart">
+							<PropertyRef Name="ShoppingCartID" />
+						</Principal>
+						<Dependent Role="ShoppingCartItem">
+							<PropertyRef Name="ShoppingCartID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="UserSpecialOfferProduct">
+					<End Role="User" Type="Catalog.Common.Service.Store.Users" Multiplicity="1" />
+					<End Role="SpecialOfferProduct" Type="Catalog.Common.Service.Store.SpecialOfferProducts" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="User">
+							<PropertyRef Name="UserID" />
+						</Principal>
+						<Dependent Role="SpecialOfferProduct">
+							<PropertyRef Name="UserID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="ShoppingCartItemProduct">
+					<End Role="ShoppingCartItem" Type="Catalog.Common.Service.Store.ShoppingCartItems" Multiplicity="0..1" />
+					<End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="ShoppingCartItem">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+			</Schema>
+		</edmx:StorageModels>
+		<!-- CSDL content -->
+		<edmx:ConceptualModels>
+			<Schema Namespace="Catalog.Common.Service" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+				<EntityType Name="Location">
+					<Key>
+						<PropertyRef Name="LocationID" />
+					</Key>
+					<Property Name="LocationID" Type="Int16" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+					<Property Name="CostRate" Type="Decimal" Precision="10" Scale="4" Nullable="false" />
+					<Property Name="Availability" Type="Decimal" Precision="8" Scale="2" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+				</EntityType>
+				<EntityType Name="Product">
+					<Documentation>
+						<Summary>Shop product</Summary>
+						<LongDescription>Encapsulates products</LongDescription>
+					</Documentation>
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="ProductID" Type="Int32" annotation:StoreGeneratedPattern="None" Nullable="false" />
+					<Property Name="ProductSubcategoryID" Type="Int32" />
+					<Property Name="ArticleNumber" Type="String" Nullable="false" />
+					<Property Name="Code" Type="String" Nullable="false" />
+					<Property Name="Brand" Type="String" Nullable="false" />
+					<Property Name="Name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+					<Property Name="Price" Type="Decimal" Precision="19" Scale="2" Nullable="false" />
+					<Property Name="Description" Type="String" Nullable="false" Unicode="true" DefaultValue="&quot;&quot;" FixedLength="false" MaxLength="400" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="ProductSubcategory" Relationship="Self.FK_Product_ProductSubcategory_ProductSubcategoryID" FromRole="Product" ToRole="ProductSubcategory" />
+					<NavigationProperty Name="SpecialOfferProducts" Relationship="Self.FK_SpecialOfferProduct_Product_ProductID" FromRole="Product" ToRole="SpecialOfferProduct" />
+					<NavigationProperty Name="ProductPhoto" Relationship="Catalog.Common.Service.ProductPhotoProduct" FromRole="Product" ToRole="ProductPhoto" />
+					<NavigationProperty Name="ProductInventories" Relationship="Catalog.Common.Service.ProductProductInventory" FromRole="Product" ToRole="ProductInventory" />
+					<NavigationProperty Name="ShoppingCartItem" Relationship="Catalog.Common.Service.ShoppingCartItemProduct" FromRole="Product" ToRole="ShoppingCartItem" />
+				</EntityType>
+				<EntityType Name="ProductCategory">
+					<Key>
+						<PropertyRef Name="ProductCategoryID" />
+					</Key>
+					<Property Name="ProductCategoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="ProductSubcategories" Relationship="Self.FK_ProductSubcategory_ProductCategory_ProductCategoryID" FromRole="ProductCategory" ToRole="ProductSubcategory" />
+				</EntityType>
+				<EntityType Name="ProductPhoto">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="Int32" Nullable="false" />
+					<Property Name="ProductID" Nullable="false" Type="Int32" />
+					<Property Name="FileName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+					<Property Name="ThumbNailPhoto" Type="Binary" MaxLength="Max" FixedLength="false" />
+					<Property Name="LargePhoto" Type="Binary" MaxLength="Max" FixedLength="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="Product" Relationship="Catalog.Common.Service.ProductPhotoProduct" FromRole="ProductPhoto" ToRole="Product" />
+				</EntityType>
+				<EntityType Name="ProductSubcategory">
+					<Key>
+						<PropertyRef Name="ProductSubcategoryID" />
+					</Key>
+					<Property Name="ProductSubcategoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="ProductCategoryID" Type="Int32" Nullable="false" />
+					<Property Name="ChildSubcategoryID" Type="Int32" Nullable="true" />
+					<Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="Products" Relationship="Self.FK_Product_ProductSubcategory_ProductSubcategoryID" FromRole="ProductSubcategory" ToRole="Product" />
+					<NavigationProperty Name="ProductCategory" Relationship="Self.FK_ProductSubcategory_ProductCategory_ProductCategoryID" FromRole="ProductSubcategory" ToRole="ProductCategory" />
+				</EntityType>
+				<EntityType Name="TransactionHistory">
+					<Key>
+						<PropertyRef Name="TransactionID" />
+					</Key>
+					<Property Name="TransactionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="TransactionDate" Type="DateTime" Nullable="false" Precision="3" annotation:StoreGeneratedPattern="None" />
+					<Property Name="Quantity" Type="Int32" Nullable="false" />
+					<Property Name="TotalCost" Type="Decimal" Precision="19" Scale="2" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+				</EntityType>
+				<EntityType Name="ShoppingCartItem">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="None" />
+					<Property Name="ProductID" Type="Int32" Nullable="false" />
+					<Property Name="ShoppingCartID" Type="Int32" Nullable="false" />
+					<Property Name="Quantity" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="None" DefaultValue="0" />
+					<Property Name="UnitPrice" Type="Decimal" Nullable="false" Precision="19" Scale="2" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="DateCreated" Type="DateTime" Nullable="false" Precision="3" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="ShoppingCart" Relationship="Catalog.Common.Service.ShoppingCartShoppingCartItem" FromRole="ShoppingCartItem" ToRole="ShoppingCart" />
+					<NavigationProperty Name="Product" Relationship="Catalog.Common.Service.ShoppingCartItemProduct" FromRole="ShoppingCartItem" ToRole="Product" />
+				</EntityType>
+				<EntityType Name="SpecialOffer">
+					<Key>
+						<PropertyRef Name="SpecialOfferID" />
+					</Key>
+					<Property Name="SpecialOfferID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="Description" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" DefaultValue="&quot;&quot;" />
+					<Property Name="DiscountPct" Type="Decimal" Precision="19" Scale="2" Nullable="false" />
+					<Property Name="Type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" DefaultValue="&quot;&quot;" />
+					<Property Name="Category" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" DefaultValue="&quot;&quot;" />
+					<Property Name="StartDate" Type="DateTime" Nullable="true" Precision="3" />
+					<Property Name="EndDate" Type="DateTime" Nullable="true" Precision="3" />
+					<Property Name="MinQty" Type="Int32" Nullable="false" DefaultValue="0" />
+					<Property Name="MaxQty" Type="Int32" DefaultValue="1000" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="SpecialOfferProducts" Relationship="Self.FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" FromRole="SpecialOffer" ToRole="SpecialOfferProduct" />
+				</EntityType>
+				<EntityType Name="SpecialOfferProduct">
+					<Key>
+						<PropertyRef Name="SpecialOfferID" />
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="SpecialOfferID" Type="Int32" Nullable="false" />
+					<Property Name="ID" Type="Int32" Nullable="false" />
+					<Property Name="UserID" Type="Int32" Nullable="false" DefaultValue="-1" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="Product" Relationship="Self.FK_SpecialOfferProduct_Product_ProductID" FromRole="SpecialOfferProduct" ToRole="Product" />
+					<NavigationProperty Name="SpecialOffer" Relationship="Self.FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" FromRole="SpecialOfferProduct" ToRole="SpecialOffer" />
+					<NavigationProperty Name="User" Relationship="Catalog.Common.Service.UserSpecialOfferProduct" FromRole="SpecialOfferProduct" ToRole="User" />
+				</EntityType>
+				<Association Name="FK_Product_ProductSubcategory_ProductSubcategoryID">
+					<End Role="ProductSubcategory" Type="Self.ProductSubcategory" Multiplicity="0..1" />
+					<End Role="Product" Type="Self.Product" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="ProductSubcategory">
+							<PropertyRef Name="ProductSubcategoryID" />
+						</Principal>
+						<Dependent Role="Product">
+							<PropertyRef Name="ProductSubcategoryID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="FK_SpecialOfferProduct_Product_ProductID">
+					<End Role="Product" Type="Self.Product" Multiplicity="1" />
+					<End Role="SpecialOfferProduct" Type="Self.SpecialOfferProduct" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="SpecialOfferProduct">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="FK_ProductSubcategory_ProductCategory_ProductCategoryID">
+					<End Role="ProductCategory" Type="Self.ProductCategory" Multiplicity="1" />
+					<End Role="ProductSubcategory" Type="Self.ProductSubcategory" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="ProductCategory">
+							<PropertyRef Name="ProductCategoryID" />
+						</Principal>
+						<Dependent Role="ProductSubcategory">
+							<PropertyRef Name="ProductCategoryID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID">
+					<End Role="SpecialOffer" Type="Self.SpecialOffer" Multiplicity="1" />
+					<End Role="SpecialOfferProduct" Type="Self.SpecialOfferProduct" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="SpecialOffer">
+							<PropertyRef Name="SpecialOfferID" />
+						</Principal>
+						<Dependent Role="SpecialOfferProduct">
+							<PropertyRef Name="SpecialOfferID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<EntityContainer Name="ShopEntities" annotation:LazyLoadingEnabled="true">
+					<EntitySet Name="Locations" EntityType="Self.Location" />
+					<EntitySet Name="Products" EntityType="Self.Product" />
+					<EntitySet Name="ProductCategories" EntityType="Self.ProductCategory" />
+					<EntitySet Name="ProductPhotoes" EntityType="Self.ProductPhoto" />
+					<EntitySet Name="ProductSubcategories" EntityType="Self.ProductSubcategory" />
+					<EntitySet Name="TransactionHistories" EntityType="Self.TransactionHistory" />
+					<EntitySet Name="ShoppingCartItems" EntityType="Self.ShoppingCartItem" />
+					<EntitySet Name="SpecialOffers" EntityType="Self.SpecialOffer" />
+					<EntitySet Name="SpecialOfferProducts" EntityType="Self.SpecialOfferProduct" />
+					<AssociationSet Name="FK_Product_ProductSubcategory_ProductSubcategoryID" Association="Self.FK_Product_ProductSubcategory_ProductSubcategoryID">
+						<End Role="ProductSubcategory" EntitySet="ProductSubcategories" />
+						<End Role="Product" EntitySet="Products" />
+					</AssociationSet>
+					<AssociationSet Name="FK_SpecialOfferProduct_Product_ProductID" Association="Self.FK_SpecialOfferProduct_Product_ProductID">
+						<End Role="Product" EntitySet="Products" />
+						<End Role="SpecialOfferProduct" EntitySet="SpecialOfferProducts" />
+					</AssociationSet>
+					<AssociationSet Name="FK_ProductSubcategory_ProductCategory_ProductCategoryID" Association="Self.FK_ProductSubcategory_ProductCategory_ProductCategoryID">
+						<End Role="ProductCategory" EntitySet="ProductCategories" />
+						<End Role="ProductSubcategory" EntitySet="ProductSubcategories" />
+					</AssociationSet>
+					<AssociationSet Name="FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" Association="Self.FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID">
+						<End Role="SpecialOffer" EntitySet="SpecialOffers" />
+						<End Role="SpecialOfferProduct" EntitySet="SpecialOfferProducts" />
+					</AssociationSet>
+					<AssociationSet Name="ProductPhotoProduct" Association="Catalog.Common.Service.ProductPhotoProduct">
+						<End Role="ProductPhoto" EntitySet="ProductPhotoes" />
+						<End Role="Product" EntitySet="Products" />
+					</AssociationSet>
+					<EntitySet Name="Users" EntityType="Catalog.Common.Service.User" />
+					<EntitySet Name="ProductInventories" EntityType="Catalog.Common.Service.ProductInventory" />
+					<AssociationSet Name="ProductProductInventory" Association="Catalog.Common.Service.ProductProductInventory">
+						<End Role="Product" EntitySet="Products" />
+						<End Role="ProductInventory" EntitySet="ProductInventories" />
+					</AssociationSet>
+					<EntitySet Name="ShoppingCarts" EntityType="Catalog.Common.Service.ShoppingCart" />
+					<AssociationSet Name="ShoppingCartShoppingCartItem" Association="Catalog.Common.Service.ShoppingCartShoppingCartItem">
+						<End Role="ShoppingCart" EntitySet="ShoppingCarts" />
+						<End Role="ShoppingCartItem" EntitySet="ShoppingCartItems" />
+					</AssociationSet>
+					<EntitySet Name="Settings" EntityType="Catalog.Common.Service.Settings" />
+					<AssociationSet Name="UserSpecialOfferProduct" Association="Catalog.Common.Service.UserSpecialOfferProduct">
+						<End Role="User" EntitySet="Users" />
+						<End Role="SpecialOfferProduct" EntitySet="SpecialOfferProducts" />
+					</AssociationSet>
+					<AssociationSet Name="ShoppingCartItemProduct" Association="Catalog.Common.Service.ShoppingCartItemProduct">
+						<End Role="ShoppingCartItem" EntitySet="ShoppingCartItems" />
+						<End Role="Product" EntitySet="Products" />
+					</AssociationSet>
+				</EntityContainer>
+				<Association Name="ProductPhotoProduct">
+					<End Type="Catalog.Common.Service.ProductPhoto" Role="ProductPhoto" Multiplicity="1" />
+					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" >
+					</End>
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="ProductPhoto">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<EntityType Name="User">
+					<Key>
+						<PropertyRef Name="UserID" />
+					</Key>
+					<Property Name="UserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="FirstName" Type="String" Nullable="false" MaxLength="50" Unicode="true" />
+					<Property Name="LastName" Type="String" Nullable="false" />
+					<Property Name="EmailAddress" Type="String" Nullable="false" />
+					<Property Name="Password" Type="String" Nullable="false" annotation:StoreGeneratedPattern="Computed" />
+					<NavigationProperty Name="SpecialOfferProducts" Relationship="Catalog.Common.Service.UserSpecialOfferProduct" FromRole="User" ToRole="SpecialOfferProduct" />
+				</EntityType>
+				<EntityType Name="ProductInventory">
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="None" />
+					<Property Name="ProductID" Type="Int32" Nullable="false" />
+					<Property Name="ProductCategoryID" Type="Int32" Nullable="false" />
+					<Property Name="ProductSubcategoryID" Type="Int32" Nullable="true" />
+					<Property Name="StockLevel1" Type="String" Nullable="false" DefaultValue="&quot;-&quot;" MaxLength="5" />
+					<Property Name="StockLevel2" Type="String" Nullable="false" MaxLength="5" DefaultValue="&quot;-&quot;" />
+					<Property Name="Pack" Type="String" Nullable="false" DefaultValue="&quot;&quot;" Unicode="true" />
+					<Property Name="rowguid" Type="Guid" Nullable="false" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+					<NavigationProperty Name="Product" Relationship="Catalog.Common.Service.ProductProductInventory" FromRole="ProductInventory" ToRole="Product" />
+				</EntityType>
+				<Association Name="ProductProductInventory">
+					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" />
+					<End Type="Catalog.Common.Service.ProductInventory" Role="ProductInventory" Multiplicity="1" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="ProductInventory">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<EntityType Name="ShoppingCart">
+					<Key>
+						<PropertyRef Name="ShoppingCartID" />
+					</Key>
+					<Property Name="ShoppingCartID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="Status" Type="Byte" Nullable="false" />
+					<Property Name="TotalQuantity" Type="Int32" Nullable="false" DefaultValue="0" annotation:StoreGeneratedPattern="None" />
+					<Property Name="TotalPrice" Type="Decimal" Nullable="false" Precision="19" Scale="2" DefaultValue="0" />
+					<NavigationProperty Name="ShoppingCartItems" Relationship="Catalog.Common.Service.ShoppingCartShoppingCartItem" FromRole="ShoppingCart" ToRole="ShoppingCartItem" />
+					<Property Name="ModifiedDate" Type="DateTime" annotation:StoreGeneratedPattern="None" Nullable="false" />
+					<Property Name="DateCreated" Type="DateTime" Nullable="false" annotation:StoreGeneratedPattern="None" />
+				</EntityType>
+				<Association Name="ShoppingCartShoppingCartItem">
+					<End Type="Catalog.Common.Service.ShoppingCart" Role="ShoppingCart" Multiplicity="1" />
+					<End Type="Catalog.Common.Service.ShoppingCartItem" Role="ShoppingCartItem" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="ShoppingCart">
+							<PropertyRef Name="ShoppingCartID" />
+						</Principal>
+						<Dependent Role="ShoppingCartItem">
+							<PropertyRef Name="ShoppingCartID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<EntityType Name="Settings" >
+					<Key>
+						<PropertyRef Name="ID" />
+					</Key>
+					<Property Name="ID" Type="Int32" Nullable="false" />
+					<Property Name="UpdateInterval" Type="Int32" Nullable="false" />
+					<Property Name="AskConfirmation" Type="Boolean" Nullable="false" DefaultValue="True" />
+					<Property Name="LoadImage" Type="Boolean" Nullable="false" DefaultValue="True" />
+					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" />
+				</EntityType>
+				<Association Name="UserSpecialOfferProduct">
+					<End Type="Catalog.Common.Service.User" Role="User" Multiplicity="1" />
+					<End Type="Catalog.Common.Service.SpecialOfferProduct" Role="SpecialOfferProduct" Multiplicity="*" />
+					<ReferentialConstraint>
+						<Principal Role="User">
+							<PropertyRef Name="UserID" />
+						</Principal>
+						<Dependent Role="SpecialOfferProduct">
+							<PropertyRef Name="UserID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+				<Association Name="ShoppingCartItemProduct">
+					<End Type="Catalog.Common.Service.ShoppingCartItem" Role="ShoppingCartItem" Multiplicity="0..1" />
+					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" />
+					<ReferentialConstraint>
+						<Principal Role="Product">
+							<PropertyRef Name="ID" />
+						</Principal>
+						<Dependent Role="ShoppingCartItem">
+							<PropertyRef Name="ID" />
+						</Dependent>
+					</ReferentialConstraint>
+				</Association>
+			</Schema>
+		</edmx:ConceptualModels>
+		<!-- C-S mapping content -->
+		<edmx:Mappings>
+			<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+				<EntityContainerMapping StorageEntityContainer="CatalogCommonServiceStoreContainer" CdmEntityContainer="ShopEntities">
+					<EntitySetMapping Name="Locations">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.Location)">
+							<MappingFragment StoreEntitySet="Locations">
+								<ScalarProperty Name="LocationID" ColumnName="LocationID" />
+								<ScalarProperty Name="Name" ColumnName="Name" />
+								<ScalarProperty Name="CostRate" ColumnName="CostRate" />
+								<ScalarProperty Name="Availability" ColumnName="Availability" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="Products">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.Product)">
+							<MappingFragment StoreEntitySet="Products">
+								<ScalarProperty Name="ID" ColumnName="ID" />
+								<ScalarProperty Name="ProductID" ColumnName="ProductID" />
+								<ScalarProperty Name="ProductSubcategoryID" ColumnName="ProductSubcategoryID" />
+								<ScalarProperty Name="ArticleNumber" ColumnName="ArticleNumber" />
+								<ScalarProperty Name="Code" ColumnName="Code" />
+								<ScalarProperty Name="Brand" ColumnName="Brand" />
+								<ScalarProperty Name="Name" ColumnName="Name" />
+								<ScalarProperty Name="Price" ColumnName="Price" />
+								<ScalarProperty Name="Description" ColumnName="Description" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="ProductCategories">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.ProductCategory)">
+							<MappingFragment StoreEntitySet="ProductCategories">
+								<ScalarProperty Name="ProductCategoryID" ColumnName="ProductCategoryID" />
+								<ScalarProperty Name="Name" ColumnName="Name" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="ProductPhotoes">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.ProductPhoto)">
+							<MappingFragment StoreEntitySet="ProductPhotoes">
+								<ScalarProperty Name="ID" ColumnName="ID" />
+								<ScalarProperty Name="ProductID" ColumnName="ProductID" />
+								<ScalarProperty Name="FileName" ColumnName="FileName" />
+								<ScalarProperty Name="ThumbNailPhoto" ColumnName="ThumbNailPhoto" />
+								<ScalarProperty Name="LargePhoto" ColumnName="LargePhoto" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="ProductSubcategories">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.ProductSubcategory)">
+							<MappingFragment StoreEntitySet="ProductSubcategories">
+								<ScalarProperty Name="ProductSubcategoryID" ColumnName="ProductSubcategoryID" />
+								<ScalarProperty Name="ProductCategoryID" ColumnName="ProductCategoryID" />
+								<ScalarProperty Name="ChildSubcategoryID" ColumnName="ChildSubcategoryID" />
+								<ScalarProperty Name="Name" ColumnName="Name" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="TransactionHistories">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.TransactionHistory)">
+							<MappingFragment StoreEntitySet="TransactionHistories">
+								<ScalarProperty Name="TransactionID" ColumnName="TransactionID" />
+								<ScalarProperty Name="TransactionDate" ColumnName="TransactionDate" />
+								<ScalarProperty Name="Quantity" ColumnName="Quantity" />
+								<ScalarProperty Name="TotalCost" ColumnName="TotalCost" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="ShoppingCartItems">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.ShoppingCartItem)">
+							<MappingFragment StoreEntitySet="ShoppingCartItems">
+								<ScalarProperty Name="ID" ColumnName="ID" />
+								<ScalarProperty Name="ProductID" ColumnName="ProductID" />
+								<ScalarProperty Name="ShoppingCartID" ColumnName="ShoppingCartID" />
+								<ScalarProperty Name="Quantity" ColumnName="Quantity" />
+								<ScalarProperty Name="UnitPrice" ColumnName="UnitPrice" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="DateCreated" ColumnName="DateCreated" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="SpecialOffers">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.SpecialOffer)">
+							<MappingFragment StoreEntitySet="SpecialOffers">
+								<ScalarProperty Name="SpecialOfferID" ColumnName="SpecialOfferID" />
+								<ScalarProperty Name="Description" ColumnName="Description" />
+								<ScalarProperty Name="DiscountPct" ColumnName="DiscountPct" />
+								<ScalarProperty Name="Type" ColumnName="Type" />
+								<ScalarProperty Name="Category" ColumnName="Category" />
+								<ScalarProperty Name="StartDate" ColumnName="StartDate" />
+								<ScalarProperty Name="EndDate" ColumnName="EndDate" />
+								<ScalarProperty Name="MinQty" ColumnName="MinQty" />
+								<ScalarProperty Name="MaxQty" ColumnName="MaxQty" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="SpecialOfferProducts">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.SpecialOfferProduct)">
+							<MappingFragment StoreEntitySet="SpecialOfferProducts">
+								<ScalarProperty Name="SpecialOfferID" ColumnName="SpecialOfferID" />
+								<ScalarProperty Name="ID" ColumnName="ID" />
+								<ScalarProperty Name="UserID" ColumnName="UserID" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="Users">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.User)">
+							<MappingFragment StoreEntitySet="Users">
+								<ScalarProperty Name="UserID" ColumnName="UserID" />
+								<ScalarProperty Name="FirstName" ColumnName="FirstName" />
+								<ScalarProperty Name="LastName" ColumnName="LastName" />
+								<ScalarProperty Name="EmailAddress" ColumnName="EmailAddress" />
+								<ScalarProperty Name="Password" ColumnName="Password" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="ProductInventories">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.ProductInventory)">
+							<MappingFragment StoreEntitySet="ProductInventories">
+								<ScalarProperty Name="ID" ColumnName="ID" />
+								<ScalarProperty Name="ProductID" ColumnName="ProductID" />
+								<ScalarProperty Name="ProductCategoryID" ColumnName="ProductCategoryID" />
+								<ScalarProperty Name="ProductSubcategoryID" ColumnName="ProductSubcategoryID" />
+								<ScalarProperty Name="StockLevel1" ColumnName="StockLevel1" />
+								<ScalarProperty Name="StockLevel2" ColumnName="StockLevel2" />
+								<ScalarProperty Name="Pack" ColumnName="Pack" />
+								<ScalarProperty Name="rowguid" ColumnName="rowguid" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="ShoppingCarts">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.ShoppingCart)">
+							<MappingFragment StoreEntitySet="ShoppingCarts">
+								<ScalarProperty Name="ShoppingCartID" ColumnName="ShoppingCartID" />
+								<ScalarProperty Name="Status" ColumnName="Status" />
+								<ScalarProperty Name="TotalQuantity" ColumnName="TotalQuantity" />
+								<ScalarProperty Name="TotalPrice" ColumnName="TotalPrice" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+								<ScalarProperty Name="DateCreated" ColumnName="DateCreated" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+					<EntitySetMapping Name="Settings">
+						<EntityTypeMapping TypeName="IsTypeOf(Catalog.Common.Service.Settings)">
+							<MappingFragment StoreEntitySet="Settings">
+								<ScalarProperty Name="ID" ColumnName="ID" />
+								<ScalarProperty Name="UpdateInterval" ColumnName="UpdateInterval" />
+								<ScalarProperty Name="AskConfirmation" ColumnName="AskConfirmation" />
+								<ScalarProperty Name="LoadImage" ColumnName="LoadImage" />
+								<ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+							</MappingFragment>
+						</EntityTypeMapping>
+					</EntitySetMapping>
+				</EntityContainerMapping>
+			</Mapping>
+		</edmx:Mappings>
+	</edmx:Runtime>
+	<!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+	<Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+		<Connection>
+			<DesignerInfoPropertySet>
+				<DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+			</DesignerInfoPropertySet>
+		</Connection>
+		<Options>
+			<DesignerInfoPropertySet>
+				<DesignerProperty Name="ValidateOnBuild" Value="true" />
+				<DesignerProperty Name="EnablePluralization" Value="true" />
+				<DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+				<DesignerProperty Name="UseLegacyProvider" Value="False" />
+				<DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+			</DesignerInfoPropertySet>
+		</Options>
+		<!-- Diagram content (shape and connector positions) -->
+		<Diagrams>
+			<Diagram DiagramId="08018bb775e94cd0ab1a301cbac36310" Name="Diagram1" ZoomLevel="101" ShowGrid="true">
+				<EntityTypeShape EntityType="Catalog.Common.Service.Location" Width="2.125" PointX="8" PointY="5.375" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.Product" Width="3.625" PointX="7.25" PointY="12.125" IsExpanded="true" FillColor="OrangeRed" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.ProductCategory" Width="2" PointX="2.75" PointY="8.375" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.ProductPhoto" Width="2.25" PointX="13.5" PointY="10.375" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.ProductSubcategory" Width="2" PointX="2.75" PointY="11.5" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.TransactionHistory" Width="2.125" PointX="11.25" PointY="5.5" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.ShoppingCartItem" Width="2.375" PointX="4.625" PointY="17.25" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.SpecialOffer" Width="2.25" PointX="8" PointY="22.625" IsExpanded="true" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.SpecialOfferProduct" Width="2.25" PointX="8" PointY="19.125" IsExpanded="true" />
+				<AssociationConnector Association="Catalog.Common.Service.FK_Product_ProductSubcategory_ProductSubcategoryID" ManuallyRouted="false" />
+				<AssociationConnector Association="Catalog.Common.Service.FK_SpecialOfferProduct_Product_ProductID" ManuallyRouted="false" />
+				<AssociationConnector Association="Catalog.Common.Service.FK_ProductSubcategory_ProductCategory_ProductCategoryID" ManuallyRouted="false" />
+				<AssociationConnector Association="Catalog.Common.Service.FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" ManuallyRouted="false" />
+				<AssociationConnector Association="Catalog.Common.Service.ProductPhotoProduct" ManuallyRouted="true" >
+					<ConnectorPoint PointX="14.625" PointY="12.70851954738299" />
+					<ConnectorPoint PointX="14.625" PointY="13.309391062701184" />
+					<ConnectorPoint PointX="14.0625" PointY="13.309391062701184" />
+					<ConnectorPoint PointX="14.0625" PointY="14.529342321074488" />
+					<ConnectorPoint PointX="10.875" PointY="14.529342321074488" />
+				</AssociationConnector>
+				<EntityTypeShape EntityType="Catalog.Common.Service.User" Width="2.375" PointX="0.625" PointY="16.75" FillColor="Purple" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.ProductInventory" Width="3.625" PointX="7.25" PointY="8.75" FillColor="Purple" />
+				<AssociationConnector Association="Catalog.Common.Service.ProductProductInventory" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.ShoppingCart" Width="3" PointX="1.125" PointY="20.5" />
+				<AssociationConnector Association="Catalog.Common.Service.ShoppingCartShoppingCartItem" />
+				<EntityTypeShape EntityType="Catalog.Common.Service.Settings" Width="1.5" PointX="4.375" PointY="5.875" />
+				<AssociationConnector Association="Catalog.Common.Service.UserSpecialOfferProduct" />
+				<AssociationConnector Association="Catalog.Common.Service.ShoppingCartItemProduct" />
+			</Diagram>
+		</Diagrams>
+	</Designer>
+</edmx:Edmx>

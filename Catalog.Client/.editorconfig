@@ -1,0 +1,13 @@
+﻿[*.cs]
+
+# IDE0009: Member access should be qualified.
+dotnet_style_qualification_for_method = false:silent
+
+# IDE0009: Member access should be qualified.
+dotnet_style_qualification_for_field = true:silent
+
+# IDE0009: Member access should be qualified.
+dotnet_style_qualification_for_property = true:silent
+
+# IDE0009: Member access should be qualified.
+dotnet_style_qualification_for_event = true:silent

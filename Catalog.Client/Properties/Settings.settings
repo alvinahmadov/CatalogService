@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Catalog.Client.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="serviceURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://localhost:60585/ErpDataService.svc/</Value>
+    </Setting>
+    <Setting Name="authURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://ivanshop.ru/auth/</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
