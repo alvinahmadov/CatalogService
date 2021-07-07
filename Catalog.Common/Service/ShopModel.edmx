@@ -352,7 +352,7 @@
 					<NavigationProperty Name="ProductSubcategory" Relationship="Self.FK_Product_ProductSubcategory_ProductSubcategoryID" FromRole="Product" ToRole="ProductSubcategory" />
 					<NavigationProperty Name="SpecialOfferProducts" Relationship="Self.FK_SpecialOfferProduct_Product_ProductID" FromRole="Product" ToRole="SpecialOfferProduct" />
 					<NavigationProperty Name="ProductPhoto" Relationship="Catalog.Common.Service.ProductPhotoProduct" FromRole="Product" ToRole="ProductPhoto" />
-					<NavigationProperty Name="ProductInventories" Relationship="Catalog.Common.Service.ProductProductInventory" FromRole="Product" ToRole="ProductInventory" />
+					<NavigationProperty Name="ProductInventories" Relationship="Catalog.Common.Service.FK_Product_ProductInventory" FromRole="Product" ToRole="ProductInventory" />
 					<NavigationProperty Name="ShoppingCartItem" Relationship="Catalog.Common.Service.ShoppingCartItemProduct" FromRole="Product" ToRole="ShoppingCartItem" />
 				</EntityType>
 				<EntityType Name="ProductCategory">
@@ -447,7 +447,9 @@
 					<NavigationProperty Name="User" Relationship="Catalog.Common.Service.UserSpecialOfferProduct" FromRole="SpecialOfferProduct" ToRole="User" />
 				</EntityType>
 				<Association Name="FK_Product_ProductSubcategory_ProductSubcategoryID">
-					<End Role="ProductSubcategory" Type="Self.ProductSubcategory" Multiplicity="0..1" />
+					<End Role="ProductSubcategory" Type="Self.ProductSubcategory" Multiplicity="0..1" >
+            <OnDelete Action="Cascade" />
+          </End>
 					<End Role="Product" Type="Self.Product" Multiplicity="*" />
 					<ReferentialConstraint>
 						<Principal Role="ProductSubcategory">
@@ -459,7 +461,9 @@
 					</ReferentialConstraint>
 				</Association>
 				<Association Name="FK_SpecialOfferProduct_Product_ProductID">
-					<End Role="Product" Type="Self.Product" Multiplicity="1" />
+					<End Role="Product" Type="Self.Product" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
 					<End Role="SpecialOfferProduct" Type="Self.SpecialOfferProduct" Multiplicity="*" />
 					<ReferentialConstraint>
 						<Principal Role="Product">
@@ -471,7 +475,9 @@
 					</ReferentialConstraint>
 				</Association>
 				<Association Name="FK_ProductSubcategory_ProductCategory_ProductCategoryID">
-					<End Role="ProductCategory" Type="Self.ProductCategory" Multiplicity="1" />
+					<End Role="ProductCategory" Type="Self.ProductCategory" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
 					<End Role="ProductSubcategory" Type="Self.ProductSubcategory" Multiplicity="*" />
 					<ReferentialConstraint>
 						<Principal Role="ProductCategory">
@@ -526,7 +532,7 @@
 					</AssociationSet>
 					<EntitySet Name="Users" EntityType="Catalog.Common.Service.User" />
 					<EntitySet Name="ProductInventories" EntityType="Catalog.Common.Service.ProductInventory" />
-					<AssociationSet Name="ProductProductInventory" Association="Catalog.Common.Service.ProductProductInventory">
+					<AssociationSet Name="ProductProductInventory" Association="Catalog.Common.Service.FK_Product_ProductInventory">
 						<End Role="Product" EntitySet="Products" />
 						<End Role="ProductInventory" EntitySet="ProductInventories" />
 					</AssociationSet>
@@ -546,7 +552,9 @@
 					</AssociationSet>
 				</EntityContainer>
 				<Association Name="ProductPhotoProduct">
-					<End Type="Catalog.Common.Service.ProductPhoto" Role="ProductPhoto" Multiplicity="1" />
+					<End Type="Catalog.Common.Service.ProductPhoto" Role="ProductPhoto" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
 					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" >
 					</End>
 					<ReferentialConstraint>
@@ -582,9 +590,9 @@
 					<Property Name="Pack" Type="String" Nullable="false" DefaultValue="&quot;&quot;" Unicode="true" />
 					<Property Name="rowguid" Type="Guid" Nullable="false" />
 					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-					<NavigationProperty Name="Product" Relationship="Catalog.Common.Service.ProductProductInventory" FromRole="ProductInventory" ToRole="Product" />
+					<NavigationProperty Name="Product" Relationship="Catalog.Common.Service.FK_Product_ProductInventory" FromRole="ProductInventory" ToRole="Product" />
 				</EntityType>
-				<Association Name="ProductProductInventory">
+				<Association Name="FK_Product_ProductInventory">
 					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" />
 					<End Type="Catalog.Common.Service.ProductInventory" Role="ProductInventory" Multiplicity="1" />
 					<ReferentialConstraint>
@@ -643,8 +651,11 @@
 					</ReferentialConstraint>
 				</Association>
 				<Association Name="ShoppingCartItemProduct">
-					<End Type="Catalog.Common.Service.ShoppingCartItem" Role="ShoppingCartItem" Multiplicity="0..1" />
-					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" />
+					<End Type="Catalog.Common.Service.ShoppingCartItem" Role="ShoppingCartItem" Multiplicity="0..1" >
+          </End>
+					<End Type="Catalog.Common.Service.Product" Role="Product" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
 					<ReferentialConstraint>
 						<Principal Role="Product">
 							<PropertyRef Name="ID" />
@@ -868,7 +879,7 @@
 				</AssociationConnector>
 				<EntityTypeShape EntityType="Catalog.Common.Service.User" Width="2.375" PointX="0.625" PointY="16.75" FillColor="Purple" />
 				<EntityTypeShape EntityType="Catalog.Common.Service.ProductInventory" Width="3.625" PointX="7.25" PointY="8.75" FillColor="Purple" />
-				<AssociationConnector Association="Catalog.Common.Service.ProductProductInventory" />
+				<AssociationConnector Association="Catalog.Common.Service.FK_Product_ProductInventory" />
 				<EntityTypeShape EntityType="Catalog.Common.Service.ShoppingCart" Width="3" PointX="1.125" PointY="20.5" />
 				<AssociationConnector Association="Catalog.Common.Service.ShoppingCartShoppingCartItem" />
 				<EntityTypeShape EntityType="Catalog.Common.Service.Settings" Width="1.5" PointX="4.375" PointY="5.875" />

@@ -13,7 +13,15 @@ namespace Catalog.Common.Service
     using System.Collections.Generic;
     
     public partial class ShoppingCart
-    {   
+    {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public ShoppingCart()
+        {
+            this.TotalQuantity = 0;
+            this.TotalPrice = 0m;
+            this.ShoppingCartItems = new HashSet<ShoppingCartItem>();
+        }
+    
         public int ShoppingCartID { get; set; }
         public byte Status { get; set; }
         public int TotalQuantity { get; set; }
