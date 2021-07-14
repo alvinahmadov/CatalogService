@@ -1,14 +1,16 @@
-﻿using Catalog.Client.Properties;
-using System;
+﻿using System;
 using System.Linq;
 using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
+
 using Telerik.WinControls.UI;
 
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using Catalog.Common.Utils;
+using Catalog.Common;
 using Catalog.Common.Repository;
+using Catalog.Client.Properties;
 
 namespace Catalog.Client
 {
@@ -18,10 +20,12 @@ namespace Catalog.Client
 
 		static readonly int CollapsiblePanelMinWidth = 35;
 
+		static Common.UpdateTimer UpdateTimer;
+
 		public MainForm()
 		{
 			InitializeComponent();
-			this.Icon = Resources.ERP;
+			this.Icon = Resources.logo14;
 			this.Text = "СБМ-Волга Каталог";
 			this.Name = "СБМ-Волга";
 			this.AllowTheming = true;
@@ -31,7 +35,6 @@ namespace Catalog.Client
 			this.controlCollection = new GridControlCollection();
 			StatusLabelElement.Text = "Инициализация...";
 			this.radCollapsiblePanel.EnableAnimation = false;
-
 			this.radTreeView.SelectedNodeChanged += TreeView_SelectedNodeChanged;
 			this.radCollapsiblePanel.Collapsed += CollapsiblePanel_Collapsed;
 			this.radCollapsiblePanel.Expanded += CollapsiblePanel_Expanded;
@@ -40,10 +43,67 @@ namespace Catalog.Client
 			InitializeControls();
 		}
 
+		~MainForm()
+		{
+			try
+			{
+				Repository.Context.Database.Connection.Close();
+				UpdateTimer.Stop();
+			}
+			catch
+			{
+				Debug.WriteLine("Exception on closing connection");
+			}
+		}
+
 		protected void InitializeControls()
 		{
 			BaseGridControl.TopButton = this.topControl.OrdersButton;
 			BaseGridControl.SearchTextBox = this.topControl.SearchTextBox;
+
+			void updateCallback()
+			{
+				Debug.WriteLine("Update testing");
+				WebWorker.LoggingCallback = UpdateStatus;
+				if (!WebWorker.HasConnection)
+				{
+					UpdateStatus("Отсутствует подключение к сети!");
+					Thread.Sleep(1500);
+					return;
+				}
+
+				if (WebWorker.UpdateStatus == Common.UpdateStatus.Started)
+					return;
+
+				try
+				{
+					
+					WebWorker.UpdateStatus = Common.UpdateStatus.Started;
+					WebWorker.InitProductCategories();
+					WebWorker.InitProductSubcategories();
+					var productCount = WebWorker.InitProducts();
+
+					if (Settings.Default.LoadImage && WebWorker.HasConnection
+						&& !WebWorker.PhotosUpdating)
+					{
+						UpdateStatus("Обновление картинок...");
+						Task.Run(WebWorker.InitProductPhotos);
+					}
+
+					MainRepository.ResetCache(CacheType.INVENTORY);
+					UpdateStatus($"<html>Обновлено <b>{productCount}</b> товаров");
+					WebWorker.UpdateStatus = Common.UpdateStatus.Finished;
+				}
+				catch (Exception ex)
+				{
+					UpdateStatus($"<html><span style=\"color:red;\">Произошла ошибка: {ex.Message}</span>");
+					MessageBox.Show($"{ex.Message}\n{ex.StackTrace}", "Connection Error");
+				}
+			}
+
+			var interval = Settings.Default.UpdateInterval;
+
+			UpdateTimer = new Common.UpdateTimer(interval, updateCallback);
 
 			var builder = new NodeBuilder(radTreeView, FontStyle.Bold);
 			var absTag = ProductTag.Absolute;
@@ -70,7 +130,7 @@ namespace Catalog.Client
 							var price = CultureConfig.CurrencyInfo.Format(cart.TotalPrice);
 							this.topControl.OrdersButton.Text =
 								String.Format(
-									StatusTemplate.ORDERS_STATUS_TEMPLATE,
+									MESSAGE.Gui.ORDERS_STATUS_TEMPLATE,
 									cart.TotalQuantity,
 									price
 								);
@@ -87,10 +147,15 @@ namespace Catalog.Client
 			radTreeView.Nodes.AddRange(treeNodes.Values);
 			this.WindowState = FormWindowState.Maximized;
 			this.topControl.Visible = true;
+			UpdateTimer.Start();
+		}
+
+		void UpdateStatus(string statusText, Object obj = null)
+		{
+			Invoke(new Action(() => StatusLabelElement.Text = statusText));
 		}
 
 		#region Event handling
-
 
 		private void CollapsiblePanel_Expanded(object sender, EventArgs e)
 		{
@@ -154,7 +219,7 @@ namespace Catalog.Client
 		{
 			try
 			{
-				BaseGridControl newCtrl = null;
+				InventoriesControl newCtrl = null;
 				ControlContainer currentHldr = null;
 
 				if (tag.IsZero || tag.SID == -1) // Common
@@ -168,7 +233,7 @@ namespace Catalog.Client
 
 				currentHldr.IsCurrentControl = true;
 				controlCollection.ActiveControl = currentHldr;
-				newCtrl = currentHldr.Control;
+				newCtrl = currentHldr.Control as InventoriesControl;
 				var oldCtrl = tableLayoutPanelBottom.GetControlFromPosition(1, 1);
 
 				if (oldCtrl != null)
@@ -186,7 +251,7 @@ namespace Catalog.Client
 				}
 				tableLayoutPanelBottom.Controls.Add(newCtrl, 1, 1);
 				radTreeView.SelectedNode.Value = tag.ToString();
-				(newCtrl as InventoriesControl).ResetFilter();
+				newCtrl.ResetFilter(true);
 			}
 			catch (Exception ex)
 			{

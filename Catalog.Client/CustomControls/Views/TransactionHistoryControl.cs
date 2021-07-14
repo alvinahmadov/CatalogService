@@ -2,36 +2,22 @@
 using System.Linq;
 using System.Collections.Generic;
 
-using Catalog.Common.Repository;
-using Catalog.Common.Service;
-using Catalog.Common.Utils;
-
 using Telerik.WinControls.UI;
 using Telerik.Windows.Documents.Spreadsheet.Model;
 
+using Catalog.Common;
+using Catalog.Common.Service;
+using Catalog.Common.Repository;
+
 namespace Catalog.Client
 {
-	class TransactionHistoryControl : BaseGridControl
+	sealed class TransactionHistoryControl : BaseGridControl
 	{
-		internal class Comparer : IComparer<TransactionHistory>
-		{
-			public Int32 Compare(TransactionHistory x, TransactionHistory y)
-			{
-				return y.TransactionDate.CompareTo(x.TransactionDate);
-			}
-		}
-
-		#region Properties
-
-		List<TransactionHistory> data = new List<TransactionHistory>();
-
 		Action<List<TransactionHistory>> QueryCallback { get; set; }
-
-		#endregion
 
 		#region Initializers
 
-		public TransactionHistoryControl() : base(null)
+		public TransactionHistoryControl()
 		{
 			this.radToTextBox.Visible = false;
 			this.radFromTextBox.Visible = false;
@@ -44,22 +30,11 @@ namespace Catalog.Client
 		protected override void Initialize()
 		{
 			this.exportFileName = "История.xlsx";
-			columnTypes = new Type[]
-			{
-				typeof(DateTime),
-				typeof(int),
-				typeof(int),
-				typeof(decimal)
-			};
-
-			this.columnNames.Add("Дата и время заказа");
-			this.columnNames.Add("Номер заказа");
-			this.columnNames.Add("Товары");
-			this.columnNames.Add("Cумма");
+			this.columnNames = ColumnNamesHelper.Transaction;
 			this.GridControl.ColumnCount = columnNames.Count;
-			this.GridControl.MasterViewInfo.SetColumnDataType(columnTypes);
+			this.GridControl.MasterViewInfo.SetColumnDataType(ColumnTypesHelper.Transaction);
 
-			this.QueryCallback = query =>
+			QueryCallback = query =>
 			{
 				this.data = query.ToList();
 				this.GridControl.RowCount = this.data.Count;
@@ -79,7 +54,7 @@ namespace Catalog.Client
 
 		}
 
-		private void OnLoad(Object sender, EventArgs e)
+		protected override void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
 			RefreshData();
@@ -144,23 +119,6 @@ namespace Catalog.Client
 			}
 		}
 
-		protected void GridControl_CellFormatting(object sender, VirtualGridCellElementEventArgs e)
-		{
-			if (e.CellElement is VirtualGridHeaderCellElement)
-			{
-				e.CellElement.TextWrap = true;
-			}
-			if (e.CellElement is VirtualGridFilterCellElement)
-			{
-				e.CellElement.Enabled = false;
-			}
-			if (e.CellElement.RowIndex >= 0)
-			{
-				e.CellElement.TextWrap = true;
-				e.CellElement.Image = null;
-			}
-		}
-
 		protected override void GridControl_SortChanged(object sender, VirtualGridEventArgs e)
 		{
 			if (e.ViewInfo.SortDescriptors.Count == 0)
@@ -179,6 +137,23 @@ namespace Catalog.Client
 				base.GridControl_SortChanged(sender, e);
 			}
 
+		}
+
+		private void GridControl_CellFormatting(object sender, VirtualGridCellElementEventArgs e)
+		{
+			if (e.CellElement is VirtualGridHeaderCellElement)
+			{
+				e.CellElement.TextWrap = true;
+			}
+			if (e.CellElement is VirtualGridFilterCellElement)
+			{
+				e.CellElement.Enabled = false;
+			}
+			if (e.CellElement.RowIndex >= 0)
+			{
+				e.CellElement.TextWrap = true;
+				e.CellElement.Image = null;
+			}
 		}
 
 		#endregion
@@ -235,5 +210,7 @@ namespace Catalog.Client
 		}
 
 		#endregion
+
+		private List<TransactionHistory> data = new List<TransactionHistory>();
 	}
 }

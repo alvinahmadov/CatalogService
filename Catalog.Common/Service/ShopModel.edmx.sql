@@ -2,13 +2,11 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 06/16/2021 10:12:19
+-- Date Created: 07/13/2021 17:54:38
 -- Generated from EDMX file: C:\Users\Alvin\source\repos\Catalog\Catalog.Common\Service\ShopModel.edmx
 -- --------------------------------------------------
 
 SET QUOTED_IDENTIFIER OFF;
-GO
-CREATE DATABASE [Catalog];
 GO
 USE [Catalog];
 GO
@@ -34,8 +32,8 @@ GO
 IF OBJECT_ID(N'[dbo].[FK_ProductPhotoProduct]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[ProductPhotoes] DROP CONSTRAINT [FK_ProductPhotoProduct];
 GO
-IF OBJECT_ID(N'[dbo].[FK_ProductProductInventory]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[ProductInventories] DROP CONSTRAINT [FK_ProductProductInventory];
+IF OBJECT_ID(N'[dbo].[FK_Product_ProductInventory]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[ProductInventories] DROP CONSTRAINT [FK_Product_ProductInventory];
 GO
 IF OBJECT_ID(N'[dbo].[FK_ShoppingCartShoppingCartItem]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[ShoppingCartItems] DROP CONSTRAINT [FK_ShoppingCartShoppingCartItem];
@@ -238,7 +236,7 @@ GO
 
 -- Creating table 'Settings'
 CREATE TABLE [dbo].[Settings] (
-    [ID] int  NOT NULL,
+    [ID] int IDENTITY(1,1) NOT NULL,
     [UpdateInterval] int  NOT NULL,
     [AskConfirmation] bit  NOT NULL,
     [LoadImage] bit  NOT NULL,
@@ -338,7 +336,7 @@ ADD CONSTRAINT [FK_Product_ProductSubcategory_ProductSubcategoryID]
     FOREIGN KEY ([ProductSubcategoryID])
     REFERENCES [dbo].[ProductSubcategories]
         ([ProductSubcategoryID])
-    ON DELETE NO ACTION ON UPDATE NO ACTION;
+    ON DELETE CASCADE ON UPDATE NO ACTION;
 GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_Product_ProductSubcategory_ProductSubcategoryID'
@@ -353,7 +351,7 @@ ADD CONSTRAINT [FK_SpecialOfferProduct_Product_ProductID]
     FOREIGN KEY ([ID])
     REFERENCES [dbo].[Products]
         ([ID])
-    ON DELETE NO ACTION ON UPDATE NO ACTION;
+    ON DELETE CASCADE ON UPDATE NO ACTION;
 GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_SpecialOfferProduct_Product_ProductID'
@@ -368,7 +366,7 @@ ADD CONSTRAINT [FK_ProductSubcategory_ProductCategory_ProductCategoryID]
     FOREIGN KEY ([ProductCategoryID])
     REFERENCES [dbo].[ProductCategories]
         ([ProductCategoryID])
-    ON DELETE NO ACTION ON UPDATE NO ACTION;
+    ON DELETE CASCADE ON UPDATE NO ACTION;
 GO
 
 -- Creating non-clustered index for FOREIGN KEY 'FK_ProductSubcategory_ProductCategory_ProductCategoryID'
@@ -397,7 +395,7 @@ GO
 
 -- Creating foreign key on [ID] in table 'ProductInventories'
 ALTER TABLE [dbo].[ProductInventories]
-ADD CONSTRAINT [FK_ProductProductInventory]
+ADD CONSTRAINT [FK_Product_ProductInventory]
     FOREIGN KEY ([ID])
     REFERENCES [dbo].[Products]
         ([ID])
@@ -440,7 +438,7 @@ ADD CONSTRAINT [FK_ShoppingCartItemProduct]
     FOREIGN KEY ([ID])
     REFERENCES [dbo].[Products]
         ([ID])
-    ON DELETE NO ACTION ON UPDATE NO ACTION;
+    ON DELETE CASCADE ON UPDATE NO ACTION;
 GO
 
 -- --------------------------------------------------

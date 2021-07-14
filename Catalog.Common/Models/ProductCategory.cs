@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using Catalog.Common.Repository;
 
@@ -20,15 +21,20 @@ namespace Catalog.Common.Service
 			try
 			{
 				if (isAddingItem)
+				{
 					Repository.Repository.Context.ProductCategories.Add(this);
+				}
 
 				if (commit)
+				{
+					Debug.WriteLine("Commit at ProductCategory.Save");
 					Commit();
+				}
 			}
 			catch { }
 		}
 
-		public override void Update(object entity, bool save)
+		public override bool Update(object entity, bool save)
 		{
 			var category = entity as ProductCategory;
 
@@ -39,8 +45,11 @@ namespace Catalog.Common.Service
 				this.ModifiedDate = DateTime.Now;
 				if (save)
 					Save(false);
+
+				return true;
 			}
 
+			return false;
 		}
 
 		public override void Delete()

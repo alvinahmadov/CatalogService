@@ -13,7 +13,8 @@ namespace Catalog.Common.Repository
 		INVENTORY,
 		CATEGORY,
 		SUBCATEGORY,
-		PHOTO
+		PHOTO,
+		CART_ITEM
 	}
 
 	public partial class MainRepository
@@ -25,8 +26,15 @@ namespace Catalog.Common.Repository
 		private static List<ProductSubcategory> productSubcategoriesCache = null;
 		private static List<ProductInventory> productInventoryCache = null;
 		private static List<ProductPhoto> productPhotoCache = null;
+		private static List<ShoppingCartItem> shoppingCartItemCache = null;
 
 		#endregion
+
+		public static void ResetCaches(params CacheType[] cacheTypes) 
+		{
+			foreach (var cacheType in cacheTypes)
+				ResetCache(cacheType);
+		}
 
 		public static void ResetCache(CacheType type = CacheType.ALL)
 		{
@@ -46,6 +54,9 @@ namespace Catalog.Common.Repository
 					break;
 				case CacheType.PHOTO:
 					productPhotoCache = null;
+					break;
+				case CacheType.CART_ITEM:
+					shoppingCartItemCache = null;
 					break;
 				default:
 					productsCache = null;
@@ -110,7 +121,7 @@ namespace Catalog.Common.Repository
 
 				return productCategoriesCache;
 			}
-			private set
+			set
 			{
 				if (productCategoriesCache != value)
 					productCategoriesCache = value;
@@ -125,9 +136,9 @@ namespace Catalog.Common.Repository
 					productSubcategoriesCache = Context.ProductSubcategories.ToList();
 				return productSubcategoriesCache;
 			}
-			private set
+			set
 			{
-				if (productSubcategoriesCache != value)
+				//if (productSubcategoriesCache != value)
 					productSubcategoriesCache = value;
 			}
 
@@ -138,14 +149,32 @@ namespace Catalog.Common.Repository
 			get
 			{
 				if (productPhotoCache == null)
-					productPhotoCache = Context.ProductPhotoes.ToList();
+					productPhotoCache = Context.ProductPhotos.ToList();
 
 				return productPhotoCache;
 			}
-			private set
+			set
 			{
 				if (productPhotoCache != value)
 					productPhotoCache = value;
+			}
+		}
+
+		public static List<ShoppingCartItem> ShoppingCartItemsCache
+		{
+			get
+			{
+				if (shoppingCartItemCache == null)
+					shoppingCartItemCache = Context.ShoppingCartItems.ToList();
+
+				return shoppingCartItemCache;
+			}
+			set
+			{
+				if (shoppingCartItemCache != value)
+				{
+					shoppingCartItemCache = value;
+				}
 			}
 		}
 

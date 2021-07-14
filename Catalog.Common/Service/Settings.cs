@@ -17,6 +17,7 @@ namespace Catalog.Common.Service
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Settings()
         {
+            this.UpdateInterval = 30;
             this.AskConfirmation = true;
             this.LoadImage = true;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Catalog.Common.Service
 {
@@ -6,6 +7,7 @@ namespace Catalog.Common.Service
 	{
 		public static void Commit(bool async = false)
 		{
+			Debug.WriteLine("Committing");
 			if (async)
 				Repository.Repository.SaveChangesAsync();
 			else
@@ -26,7 +28,7 @@ namespace Catalog.Common.Service
 			throw new NotImplementedException();
 		}
 
-		public virtual void Update(object entity, bool commit = false)
+		public virtual bool Update(object entity, bool commit = false)
 		{
 			throw new NotImplementedException();
 		}

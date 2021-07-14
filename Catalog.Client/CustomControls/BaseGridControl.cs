@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Drawing;
+using System.Windows.Forms;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 using Telerik.WinControls;
 using Telerik.WinControls.UI;
@@ -13,7 +13,7 @@ using Telerik.Windows.Documents.Spreadsheet.Model;
 
 using Catalog.Common;
 using Catalog.Common.Repository;
-using Catalog.Common.Utils;
+using Catalog.Common.Service;
 using Catalog.Client.Properties;
 
 namespace Catalog.Client
@@ -22,7 +22,7 @@ namespace Catalog.Client
 	{
 		#region Properties
 
-		public bool JobsFinised { get; set; }
+		public bool IsUpdated { get; set; } = false;
 
 		public bool DataLoaded { get; protected set; } = false;
 
@@ -41,14 +41,10 @@ namespace Catalog.Client
 
 		#endregion
 
-		public BaseGridControl(ProductTag tag)
+		public BaseGridControl(ProductTag tag = null)
 		{
 			InitializeComponent();
-
-			Tag = tag;
-			this.exportFileName = "Товары.xlsx";
-			this.columnNames = new List<string>();
-			this.detailColumnNames = new List<string>();
+			this.Tag = tag;
 			this.Dock = DockStyle.Fill;
 			this.Margin = new Padding(0);
 			this.Padding = new Padding(0);
@@ -59,7 +55,13 @@ namespace Catalog.Client
 			this.GridControl.MasterViewInfo.AllowColumnResize = false;
 			this.GridControl.MasterViewInfo.AllowRowResize = false;
 			this.GridControl.MasterViewInfo.AllowEdit = false;
+
+			this.exportFileName = "Товары.xlsx";
+			this.columnNames = new List<string>();
+			this.detailColumnNames = new List<string>();
+
 			Initialize();
+
 			this.GridControl.CreateCellElement += GridControl_CreateCellElement;
 			this.GridControl.SortChanged += GridControl_SortChanged;
 			this.GridControl.CellValueNeeded += GridControl_CellValueNeeded;
@@ -85,7 +87,9 @@ namespace Catalog.Client
 			this.radToTextBox.Leave += RadTextBox_Leave;
 		}
 
-		protected void ShowScreenTipForCell(VirtualGridCellElement cell, int cellIndex, Common.Service.ProductInventory inventory)
+		#pragma warning disable IDE0060 // Remove unused parameter
+		protected void ShowScreenTipForCell(VirtualGridCellElement cell, Int32 cellIndex, ProductInventory inventory)
+#pragma warning restore IDE0060 // Remove unused parameter
 		{
 			using (var defaultFont = new Font("Segoe UI", 14F))
 			{
@@ -112,7 +116,7 @@ namespace Catalog.Client
 				}
 				else
 				{
-					Image tipImage = ImageUtils.GetImage(imgData.LargePhoto);
+					Image tipImage = ImageUtil.GetImage(imgData.LargePhoto);
 
 					int width = tipImage.Width,
 						height = Int32.MaxValue;
@@ -165,7 +169,7 @@ namespace Catalog.Client
 		protected virtual void Initialize()
 		{ }
 
-		public virtual void ResetView(bool fitColumns = true)
+		public virtual void ResetView(Boolean fitColumns = true)
 		{
 		}
 
@@ -177,33 +181,33 @@ namespace Catalog.Client
 
 		#region Event handling
 
-		protected virtual void GridControl_SortChanged(object sender, VirtualGridEventArgs e)
-		{
-			RefreshData();
-		}
-
 		protected virtual void GridControl_CreateCellElement(object sender, VirtualGridCreateCellEventArgs e)
 		{ }
 
 		protected virtual void GridControl_CellValueNeeded(object sender, VirtualGridCellValueNeededEventArgs e)
 		{ }
 
+		protected virtual void GridControl_SortChanged(object sender, VirtualGridEventArgs e)
+		{
+			RefreshData();
+		}
+
 		#endregion
 
 		#region Export handling
 
-		protected virtual void ExportButton_Click(object sender, EventArgs e)
+		protected virtual void ExportButton_Click(Object sender, EventArgs e)
 		{
 			if (GridControl.MasterViewInfo.IsWaiting)
 			{
-				RadMessageBox.Show("The Data is not loaded! Please wait!");
+				RadMessageBox.Show(MESSAGE.Gui.HURRY_WARNING);
 				return;
 			}
 
 			using (var savefile = new SaveFileDialog
 			{
 				FileName = exportFileName,
-				Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*"
+				Filter = GUI.SAVE_FILTER
 			})
 			{
 				if (savefile.ShowDialog() == DialogResult.OK)
@@ -218,7 +222,11 @@ namespace Catalog.Client
 						}
 						catch (Exception ex)
 						{
-							RadMessageBox.Show($"Закройте файл и повтрите\n{ex.Message}\n{ex.StackTrace}", "Экспорт", MessageBoxButtons.AbortRetryIgnore);
+							RadMessageBox.Show(
+								String.Format(MESSAGE.Gui.EXPORT_ERROR, ex.Message, ex.StackTrace),
+								"Экспорт",
+								MessageBoxButtons.AbortRetryIgnore
+							);
 						}
 					}
 				}
@@ -242,9 +250,7 @@ namespace Catalog.Client
 
 		protected ISavableObject currentItem;
 
-		protected Type[] columnTypes;
-
-		protected string dataFormText;
+		//protected string dataFormText;
 
 		#endregion
 	}

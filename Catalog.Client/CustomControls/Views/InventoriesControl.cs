@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Drawing;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Linq;
-using System.Diagnostics;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
+using System.Diagnostics;
 
 using Telerik.WinControls;
 using Telerik.WinControls.UI;
 using Telerik.Windows.Documents.Spreadsheet.Model;
 
-using Catalog.Common.Utils;
+using Catalog.Common;
 using Catalog.Common.Service;
 using Catalog.Common.Repository;
 using Catalog.Client.Properties;
@@ -20,60 +20,52 @@ namespace Catalog.Client
 {
 	using FilterPredicate = System.Linq.Expressions.Expression<Func<ProductInventory, bool>>;
 
-	class InventoriesControl : BaseGridControl
+	sealed class InventoriesControl : BaseGridControl
 	{
 		#region Properties
 
-		public bool IsPriceFilterApplied { get; set; }
+		public Boolean IsPriceFilterApplied { get; set; } = false;
 
-		public decimal MinPrice { get; private set; }
+		/// <summary>
+		/// Minimum price (inclusive) of product that will be shown when filtering.
+		/// </summary>
+		public Decimal MinPrice { get; private set; } = 0.0M;
 
-		public decimal MaxPrice { get; private set; }
+		/// <summary>
+		/// Maximum price (exclusive) of product that will be shown when filtering.
+		/// </summary>
+		public Decimal MaxPrice { get; private set; } = Decimal.MaxValue;
 
+		/// <summary>
+		/// Orders text shown on Order Control
+		/// </summary>
 		public String StatusText { get; private set; }
 
-		private Action<DbQuery<ProductInventory>> Callback { get; set; }
+		/// <summary>
+		/// Used to get products after applying some filtering
+		/// </summary>
+		Action<DbQuery<ProductInventory>> QueryCallback { get; set; }
 
 		#endregion
 
 		#region Initialisation
 
-		public InventoriesControl(ProductTag tag)
-			: base(tag)
+		public InventoriesControl(ProductTag tag) : base(tag)
 		{
 			this.GridControl.MasterViewInfo.MinColumnWidth = 100;
-			IsPriceFilterApplied = false;
-			MinPrice = 0.00M;
-			MaxPrice = Decimal.MaxValue;
 		}
 
 		protected override void Initialize()
 		{
-			columnTypes = new Type[] {
-				typeof(Image),
-				typeof(string),
-				typeof(string),
-				typeof(string),
-				typeof(string),
-				typeof(decimal),
-				typeof(int),
-			};
-			this.columnNames.Add("Фото");
-			this.columnNames.Add("Артикул");
-			this.columnNames.Add("Наименование товара");
-			this.columnNames.Add("НН");
-			this.columnNames.Add("МСК");
-			this.columnNames.Add("Цена");
-			this.columnNames.Add("Количество");
-
+			this.columnNames = ColumnNamesHelper.ProductInventory;
 			this.GridControl.ColumnCount = columnNames.Count;
 			this.GridControl.RowCount = (Tag as ProductTag).Count;
 
-			this.GridControl.MasterViewInfo.SetColumnDataType(columnTypes);
+			this.GridControl.MasterViewInfo.SetColumnDataType(ColumnTypesHelper.ProductInventory);
 			this.GridControl.MasterViewInfo.RegisterCustomColumn(0);
 			this.GridControl.MasterViewInfo.RegisterCustomColumn(6);
 
-			this.Callback = query =>
+			QueryCallback = query =>
 			{
 				try
 				{
@@ -124,10 +116,22 @@ namespace Catalog.Client
 			FilterDataAsync(pred);
 		}
 
-		protected void FilterDataAsync(FilterPredicate predicate)
+		public void ResetFilter(bool force = false)
+		{
+			if (IsPriceFilterApplied || force)
+			{
+				MinPrice = 0.00M;
+				MaxPrice = Decimal.MaxValue;
+				radToTextBox.Text = String.Empty;
+				radFromTextBox.Text = String.Empty;
+				IsPriceFilterApplied = false;
+				RefreshData();
+			}
+		}
+
+		private void FilterDataAsync(FilterPredicate predicate)
 		{
 			GridControl.MasterViewInfo.IsWaiting = true;
-			JobsFinised = false;
 			data.Clear();
 			DataLoaded = false;
 			TopButton.Enabled = false;
@@ -148,20 +152,7 @@ namespace Catalog.Client
 				return query;
 			});
 
-			ExecuteQueryAsync(task, Callback);
-		}
-
-		public void ResetFilter()
-		{
-			if (IsPriceFilterApplied)
-			{
-				MinPrice = 0.00M;
-				MaxPrice = Decimal.MaxValue;
-				radToTextBox.Text = String.Empty;
-				radFromTextBox.Text = String.Empty;
-				IsPriceFilterApplied = false;
-				RefreshData();
-			}
+			ExecuteQueryAsync(task, QueryCallback);
 		}
 
 		#endregion
@@ -178,7 +169,105 @@ namespace Catalog.Client
 			SearchTextBox.Clean += SearchBox_Reset;
 		}
 
-		protected void TextBox_TextChanging(Object sender, TextChangingEventArgs e)
+		protected override void GridControl_CreateCellElement(object sender, VirtualGridCreateCellEventArgs e)
+		{
+			if (e.RowIndex >= 0)
+				switch (e.ColumnIndex)
+				{
+					case 0:
+						e.CellElement = new ProductPhotoCellElement();
+						break;
+					case 6:
+						e.CellElement = new QuantityCellElement(ProductInventories, e.ColumnIndex)
+						{ ProductInventories = data };
+						this.cellElements.Add(e.CellElement);
+						break;
+				}
+		}
+
+		protected override void GridControl_CellValueNeeded(object sender, VirtualGridCellValueNeededEventArgs e)
+		{
+			if (e.ColumnIndex < 0)
+				return;
+
+			base.GridControl_CellValueNeeded(sender, e);
+
+			if (e.RowIndex < 0)
+			{
+				e.Value = columnNames[e.ColumnIndex];
+				e.FormatString = "<html><b>{0}</b>";
+
+				if (e.RowIndex == RadVirtualGrid.HeaderRowIndex)
+				{
+					e.FieldName = FieldsHelper.InventoriesFields[e.ColumnIndex];
+				}
+			}
+			else if (e.RowIndex >= 0)
+			{
+				if (e.RowIndex < data.Count && data.Count > 0)
+				{
+					var rowData = data[e.RowIndex];
+					var photo = Properties.Settings.Default.LoadImage
+						? MainRepository.ProductPhotoCache.Find(p => p.ProductID == rowData.ProductID)
+						: null;
+
+					Image image = ImageUtil.GetImage(photo?.ThumbNailPhoto, Resources.placeholder);
+
+					switch (e.ColumnIndex)
+					{
+						case 0:
+							e.Value = image;
+							break;
+						case 1:
+							e.Value = rowData.Product.ArticleNumber;
+							break;
+						case 2:
+							e.Value = rowData.Product.Name;
+							break;
+						case 3:
+							e.Value = rowData.StockLevel1;
+							break;
+						case 4:
+							e.Value = rowData.StockLevel2;
+							break;
+						case 5:
+							var price = rowData.Product.Price;
+							e.Value = price;
+							e.FormatString = CultureConfig.CurrencyInfo.Format(price);
+							break;
+						case 6:
+							var qnty = ProductInventories.Get(rowData.ProductID);
+							e.Value = qnty != null ? qnty.Quantity : 0;
+							break;
+					}
+				}
+			}
+
+		}
+
+		protected override void GridControl_SortChanged(object sender, VirtualGridEventArgs e)
+		{
+			if (e.ViewInfo.SortDescriptors.Count == 0)
+				return;
+
+			var propertyName = e.ViewInfo.SortDescriptors[0].PropertyName;
+
+			if (propertyName == "Photo" || propertyName == "Quantity")
+				return;
+
+			if (propertyName == "ArticleNumber")
+				sortMode = ProductInventorySortMode.ArticleNumber;
+			else if (propertyName == "Price")
+				sortMode = ProductInventorySortMode.Price;
+			else if (propertyName == "Name")
+				sortMode = ProductInventorySortMode.Name;
+			else
+				sortMode = ProductInventorySortMode.None;
+
+			base.GridControl_SortChanged(sender, e);
+		}
+
+		private void TextBox_TextChanging(Object sender, TextChangingEventArgs e)
 		{
 			var name = ((RadTextBox)sender).Name;
 
@@ -215,7 +304,7 @@ namespace Catalog.Client
 			}
 		}
 
-		protected virtual void SearchBox_Search(object sender, SearchTextBox.SearchBoxEventArgs e)
+		private void SearchBox_Search(object sender, SearchTextBox.SearchBoxEventArgs e)
 		{
 			var term = e.SearchText;
 
@@ -236,91 +325,13 @@ namespace Catalog.Client
 
 		}
 
-		protected virtual void SearchBox_Reset(object sender, EventArgs te)
+		private void SearchBox_Reset(object sender, EventArgs te)
 		{
 			ResetView();
 			RefreshData();
 		}
 
-		protected override void GridControl_CreateCellElement(object sender, VirtualGridCreateCellEventArgs e)
-		{
-			if (e.RowIndex >= 0)
-				switch (e.ColumnIndex)
-				{
-					case 0:
-						e.CellElement = new ProductPhotoCellElement();
-						break;
-					case 6:
-						e.CellElement = new QuantityCellElement(ProductInventories, e.ColumnIndex)
-						{ ProductInventories = data };
-						this.cellElements.Add(e.CellElement);
-						break;
-				}
-		}
-
-		protected override void GridControl_CellValueNeeded(object sender, VirtualGridCellValueNeededEventArgs e)
-		{
-			if (e.ColumnIndex < 0)
-				return;
-
-			base.GridControl_CellValueNeeded(sender, e);
-
-			if (e.RowIndex >= 0)
-			{
-				if (e.RowIndex < data.Count && data.Count > 0)
-				{
-					var rowData = data[e.RowIndex];
-					var photo = Properties.Settings.LoadImages
-						? MainRepository.ProductPhotoCache.Find(p => p.ProductID == rowData.ProductID)
-						: null;
-
-					Image image = ImageUtils.GetImage(photo?.ThumbNailPhoto, Resources.placeholder);
-
-					switch (e.ColumnIndex)
-					{
-						case 0:
-							e.Value = image;
-							break;
-						case 1:
-							e.Value = rowData.Product.ArticleNumber;
-							break;
-						case 2:
-							e.Value = rowData.Product.Name;
-							break;
-						case 3:
-							e.Value = rowData.StockLevel1;
-							e.FormatString = "<html><b>{0}";
-							break;
-						case 4:
-							e.Value = rowData.StockLevel2;
-							e.FormatString = "<html><b>{0}";
-							break;
-						case 5:
-							var price = rowData.Product.Price;
-							e.Value = price;
-							e.FormatString = CultureConfig.CurrencyInfo.Format(price);
-							break;
-						case 6:
-							var qnty = ProductInventories.Get(rowData.ProductID);
-							e.Value = qnty != null ? qnty.Quantity : 0;
-							break;
-					}
-				}
-			}
-			if (e.RowIndex < 0)
-			{
-				e.Value = columnNames[e.ColumnIndex];
-				e.FormatString = "<html><b>{0}";
-
-				if (e.RowIndex == RadVirtualGrid.HeaderRowIndex)
-				{
-					e.FieldName = FieldsHelper.InventoriesFields[e.ColumnIndex];
-				}
-			}
-
-		}
-
-		protected void GridControl_CellFormatting(object sender, VirtualGridCellElementEventArgs e)
+		private void GridControl_CellFormatting(object sender, VirtualGridCellElementEventArgs e)
 		{
 			if (e.CellElement is VirtualGridHeaderCellElement)
 			{
@@ -346,11 +357,11 @@ namespace Catalog.Client
 
 				switch (e.CellElement.ColumnIndex)
 				{
-					case 0: // ProductPhoto
+					case 0:
 						{
-							if (e.CellElement.Value is Image)
+							if (e.CellElement.Value is System.Drawing.Image)
 							{
-								e.CellElement.Image = (Image)e.CellElement.Value;
+								e.CellElement.Image = (System.Drawing.Image)e.CellElement.Value;
 								e.CellElement.Text = String.Empty;
 								e.ViewInfo.SetColumnWidth(e.CellElement.ColumnIndex, 60);
 							}
@@ -375,7 +386,7 @@ namespace Catalog.Client
 			}
 		}
 
-		protected void GridControl_ScreenTipNeeded(Object sender, ScreenTipNeededEventArgs e)
+		private void GridControl_ScreenTipNeeded(Object sender, ScreenTipNeededEventArgs e)
 		{
 			if (e.Item is VirtualGridCellElement cell)
 			{
@@ -394,28 +405,6 @@ namespace Catalog.Client
 			{
 				e.ToolTipText = cell.Value.ToString();
 			}
-		}
-
-		protected override void GridControl_SortChanged(object sender, VirtualGridEventArgs e)
-		{
-			if (e.ViewInfo.SortDescriptors.Count == 0)
-				return;
-
-			var propertyName = e.ViewInfo.SortDescriptors[0].PropertyName;
-
-			if (propertyName == "Photo" || propertyName == "Quantity")
-				return;
-
-			if (propertyName == "ArticleNumber")
-				sortMode = ProductInventorySortMode.ArticleNumber;
-			else if (propertyName == "Price")
-				sortMode = ProductInventorySortMode.Price;
-			else if (propertyName == "Name")
-				sortMode = ProductInventorySortMode.Name;
-			else
-				sortMode = ProductInventorySortMode.None;
-
-			base.GridControl_SortChanged(sender, e);
 		}
 
 		#endregion
@@ -530,7 +519,7 @@ namespace Catalog.Client
 
 		private ProductInventorySortMode sortMode = ProductInventorySortMode.None;
 
-		private List<VirtualGridCellElement> cellElements = new List<VirtualGridCellElement>();
+		private readonly List<VirtualGridCellElement> cellElements = new List<VirtualGridCellElement>();
 
 		#endregion
 	}

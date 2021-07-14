@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading;
+using System.Linq;
 using System.Windows.Forms;
-using Telerik.WinControls.UI;
 using System.Threading.Tasks;
+
+using Telerik.WinControls.UI;
 
 using Catalog.Common.Repository;
 using System.Diagnostics;
@@ -29,8 +31,14 @@ namespace Catalog.Client
 			this.logoBox.ContextMenuEnabled = false;
 			this.OperationMode = mode;
 			this.TopLevel = true;
+			WebWorker.LoggingCallback = UpdateStatus;
 			if (message != null)
 				this.StatusLabel.Text = message;
+		}
+
+		~SplashForm()
+		{
+			WebWorker.LoggingCallback = null;
 		}
 
 		protected override void OnLoad(EventArgs e)
@@ -41,48 +49,60 @@ namespace Catalog.Client
 				new Thread(new ThreadStart(FetchData)).Start();
 		}
 
-		private void UpdateStatus(string status) 
+		private void UpdateStatus(
+			string statusText,
+			Object obj = null
+		)
 		{
-			Invoke(new Action(() => this.statusLabel.Text = status));
+			var statusTextAlignment = obj != null
+										? (System.Drawing.ContentAlignment)obj
+										: System.Drawing.ContentAlignment.MiddleCenter;
+
+			StatusLabel.TextAlignment = statusTextAlignment;
+			Invoke(new Action(() => this.statusLabel.Text = statusText));
 		}
 
 		public void FetchData()
 		{
-			if (!WebRepository.HasConnection)
+			if (!WebWorker.HasConnection)
 			{
 				UpdateStatus("Отсутствует подключение к сети!");
 				Thread.Sleep(1500);
 			}
 			try
 			{
-				WebRepository.UpdateRequested = true;
-				UpdateStatus("Обновление категорий...");
-				WebRepository.GetProductCategories();
-				WebRepository.GetProductSubcategories();
-				UpdateStatus("Обновление товаров...");
-				WebRepository.GetProducts();
-				WebRepository.GetProductInventories();
+				WebWorker.UpdateStatus = Common.UpdateStatus.Started;
+				WebWorker.InitSettings();
+				WebWorker.InitProductCategories();
+				WebWorker.InitProductSubcategories();
+				var productCount = WebWorker.InitProducts();
+				var settings = Repository.Context.Settings.SingleOrDefault();
 
-				if (Properties.Settings.LoadImages && WebRepository.HasConnection) 
+				if (settings.LoadImage
+					&& WebWorker.HasConnection
+					&& !WebWorker.PhotosUpdating)
 				{
 					UpdateStatus("Обновление картинок...");
-					Task.Run(WebRepository.GetProductPhotos);
+					Task.Run(WebWorker.InitProductPhotos);
 				}
 
 				MainRepository.ResetCache(CacheType.INVENTORY);
-				UpdateStatus($"<html>Обновлено <b>{MainRepository.ProductInventoriesCache.Count}</b> товаров");
-				WebRepository.UpdateRequested = false;
+
+				UpdateStatus($"<html>Обновлено <b>{productCount}</b> товаров");
+
+				WebWorker.UpdateStatus = Common.UpdateStatus.Finished;
 			}
 			catch (Exception ex)
 			{
 				UpdateStatus($"<html><span style=\"color:red;\">Произошла ошибка: {ex.Message}</span>");
 				MessageBox.Show($"{ex.Message}\n{ex.StackTrace}", "Connection Error");
 			}
-			
-			try 
+
+			try
 			{
 				BaseGridControl.ProductInventories.Init();
-			} catch (Exception e)
+			}
+			catch (Exception e)
 			{
 				Debug.WriteLine($"Exception in SplashForm: {e.Message}\nStackTrace: {e.StackTrace}");
 			}

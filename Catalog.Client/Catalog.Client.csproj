@@ -118,7 +118,7 @@
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>ERP.ico</ApplicationIcon>
+    <ApplicationIcon>logo14.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -189,7 +189,6 @@
   <ItemGroup>
     <Compile Include="Analytics\GoogleAnalyticsMonitor.cs" />
     <Compile Include="Analytics\PlatformInfoProvider.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="CustomControls\BaseGridControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -247,9 +246,6 @@
     <Compile Include="CustomForms\SplashForm.Designer.cs">
       <DependentUpon>SplashForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\Constants.cs" />
-    <Compile Include="Helpers\DataDialogCommandEventArgs.cs" />
-    <Compile Include="Helpers\Email.cs" />
     <Compile Include="Helpers\FilterHelper.cs" />
     <Compile Include="Helpers\GridControlCollection.cs" />
     <Compile Include="Helpers\NodeBuilder.cs" />
@@ -268,8 +264,10 @@
     <Compile Include="CustomControls\TopControl.Designer.cs">
       <DependentUpon>TopControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="CustomControls\BaseGridControl.resx">
       <DependentUpon>BaseGridControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="CustomControls\TitleBarControl.resx">
       <DependentUpon>TitleBarControl.cs</DependentUpon>
@@ -383,6 +381,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="ERP.ico" />
+    <Content Include="logo14.ico" />
     <Content Include="Resources\add.png" />
     <Content Include="Resources\basket.png" />
     <None Include="Resources\startup.jpg" />
@@ -397,6 +396,8 @@
     <None Include="Resources\delete.png" />
     <None Include="Resources\market_logo.jpg" />
     <None Include="Resources\note.svg" />
+    <None Include="Resources\logo14.jpg" />
+    <None Include="Resources\logo14.ico" />
     <Content Include="Resources\placeholder.png" />
     <Content Include="Resources\remove.png" />
     <None Include="Resources\search.png" />

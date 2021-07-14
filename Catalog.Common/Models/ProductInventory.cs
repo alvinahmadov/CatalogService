@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 using Catalog.Common.Repository;
 
@@ -23,22 +24,22 @@ namespace Catalog.Common.Service
 		public override void Save(bool isAddingItem = true, bool commit = false)
 		{
 			if (isAddingItem)
+			{
 				Repository.Repository.Context.ProductInventories.Add(this);
+			}
 
 			if (commit)
+			{
+				Debug.WriteLine("Commit at ProductInventory.Save");
 				Commit();
+			}
 		}
 
-		public override void Update(object entity, bool save = false)
+		public override bool Update(object entity, bool save = false)
 		{
 			var other = entity as ProductInventory;
 
-			if (this.ProductID != other.ProductID
-				&& this.ProductCategoryID != other.ProductCategoryID
-				&& this.ProductSubcategoryID != other.ProductSubcategoryID
-				&& this.StockLevel1 != other.StockLevel1
-				&& this.StockLevel2 != other.StockLevel2
-				&& this.Pack != other.Pack)
+			if (!Equals(other))
 			{
 				this.ProductID = other.ProductID;
 				this.ProductCategoryID = other.ProductCategoryID;
@@ -46,9 +47,10 @@ namespace Catalog.Common.Service
 				this.StockLevel2 = other.StockLevel2;
 				this.Pack = other.Pack;
 
-				if (save)
-					Save(!save, save);
+				return true;
 			}
+
+			return false;
 		}
 
 		public override void Delete()
@@ -63,6 +65,36 @@ namespace Catalog.Common.Service
 			{
 				this.ProductID = this.Product.ProductID;
 			}
+		}
+
+		public override String ToString()
+		{
+			return $"ProductInventory <[" +
+			$"ProductID: {this.ProductID}, " +
+			$"ArticleNumber: {this.Product.ArticleNumber}, " +
+			$"StockLevel1: {this.StockLevel1}, " +
+			$"StockLevel2: {this.StockLevel2}, " +
+			$"Pack: {this.Pack}" +
+			$"]>";
+		}
+
+		public override Int32 GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public override Boolean Equals(Object obj)
+		{
+			if (obj == null)
+				return false;
+
+			var other = obj as ProductInventory;
+			return (this.ProductID == other.ProductID)
+			&& (this.Product.ProductID == other.Product.ProductID)
+			&& (this.StockLevel1 == other.StockLevel1)
+			&& (this.StockLevel2 == other.StockLevel2)
+			&& (this.Product == other.Product)
+			&& (this.Pack == other.Pack);
 		}
 	}
 }

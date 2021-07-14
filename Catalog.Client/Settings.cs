@@ -10,22 +10,7 @@ namespace Catalog.Client.Properties
 {
 	internal sealed partial class Settings
 	{
-		public Settings()
-		{
-			if (dbSettings is null)
-			{
-				dbSettings = new DatabaseSettings
-				{
-					ID = 1,
-					ModifiedDate = DateTime.Now,
-					UpdateInterval = 30,
-				};
-
-				dbSettings.Save(true, true);
-			} 
-		}
-
-		public static bool AskConfirmation
+		public bool AskConfirmation
 		{
 			get => dbSettings.AskConfirmation;
 			set
@@ -35,7 +20,7 @@ namespace Catalog.Client.Properties
 			}
 		}
 
-		public static bool LoadImages
+		public bool LoadImage
 		{
 			get => dbSettings.LoadImage;
 			set
@@ -45,7 +30,7 @@ namespace Catalog.Client.Properties
 			}
 		}
 
-		public static int UpdateInterval
+		public int UpdateInterval
 		{
 			get => dbSettings.UpdateInterval;
 			set
@@ -55,13 +40,13 @@ namespace Catalog.Client.Properties
 			}
 		}
 
-		public static void Commit() 
+		public void Commit()
 		{
 			dbSettings.ModifiedDate = DateTime.Now;
 			EntityModel.Commit();
 		}
 
-		private static DatabaseSettings dbSettings = Repository.Context
+		private DatabaseSettings dbSettings = Repository.Context
 																.Settings
 																.SingleOrDefault();
 	}

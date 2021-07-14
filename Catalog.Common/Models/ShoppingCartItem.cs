@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 using Catalog.Common.Repository;
 
@@ -9,11 +10,10 @@ namespace Catalog.Common.Service
 		public ShoppingCartItem(ShoppingCart cart, Product product)
 		{
 			ID = product.ID;
-			ShoppingCart = cart;
 			ProductID = product.ProductID;
-			Quantity = 0;
 			UnitPrice = product.Price;
-			Product = product;
+			ShoppingCart = cart;
+			Quantity = 0;
 			rowguid = Guid.NewGuid();
 			DateCreated = DateTime.Now;
 			ModifiedDate = DateTime.Now;
@@ -24,15 +24,20 @@ namespace Catalog.Common.Service
 			try
 			{
 				if (isAddingItem)
+				{
 					Repository.Repository.Context.ShoppingCartItems.Add(this);
+				}
 
 				if (commit)
+				{
+					Debug.WriteLine("Commit at ShoppingCartItems.Save");
 					Commit();
+				}
 			}
 			catch { }
 		}
 
-		public override void Update(object entity, bool save = false)
+		public override bool Update(object entity, bool save = false)
 		{
 			var cartItem = entity as ShoppingCartItem;
 
@@ -42,10 +47,10 @@ namespace Catalog.Common.Service
 				this.UnitPrice = cartItem.UnitPrice;
 				this.ModifiedDate = DateTime.Now;
 
-				if(save)
-					Save(!save, save);
+				return true;
 			}
 
+			return false;
 		}
 
 		public override void Delete()

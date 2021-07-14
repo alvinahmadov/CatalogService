@@ -69,6 +69,7 @@
 			this.statusLabel.Name = "radLabel1";
 			this.statusLabel.Size = new System.Drawing.Size(682, 46);
 			this.statusLabel.TabIndex = 0;
+			this.statusLabel.TextWrap = false;
 			this.statusLabel.TextAlignment = System.Drawing.ContentAlignment.MiddleCenter;
 			this.statusLabel.UseWaitCursor = true;
 			// 

@@ -5,6 +5,8 @@ using System.Windows.Forms;
 
 using Telerik.WinControls.UI;
 
+using DBSettings = Catalog.Common.Service.Settings;
+
 namespace Catalog.Client
 {
 	public partial class TopControl : UserControl
@@ -24,7 +26,7 @@ namespace Catalog.Client
 			this.Visible = false;
 			InitializeComponent();
 			this.radLayoutControl.Visible = false;
-			this.radSettingsDialog = new SettingsTabbedForm();
+			this.radSettingsDialog = null;
 			this.radSettingsButton.Click += RadSettingsButton_Click;
 
 			this.radSearchTextBox.Size = new Size(200, 100);
@@ -32,7 +34,7 @@ namespace Catalog.Client
 			this.radSearchTextBox.NullText = "Найти";
 
 			this.Margin = new Padding(0);
-			this.Load += TopControl_Load;
+			//this.Load += TopControl_Load;
 			this.VisibleChanged += TopControl_VisibleChanged;
 		}
 
@@ -48,7 +50,8 @@ namespace Catalog.Client
 
 		private void RadSettingsButton_Click(Object sender, EventArgs e)
 		{
-			radSettingsDialog.Show();
+			this.radSettingsDialog = new SettingsTabbedForm();
+			this.radSettingsDialog.Show();
 		}
 
 		#region Private members

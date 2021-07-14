@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Catalog.Common
 {
-	public class StockLevel
+	public sealed class StockLevel
 	{
 		public const string TOO_MANY = "***";
 

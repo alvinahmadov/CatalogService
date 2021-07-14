@@ -9,11 +9,10 @@
 
 namespace Catalog.Common.Service
 {
-    using System;
-    using System.Data.Entity;
-    using System.Data.Entity.Infrastructure;
-    
-    public partial class ShopEntities : DbContext
+	using System.Data.Entity;
+	using System.Data.Entity.Infrastructure;
+
+	public partial class ShopEntities : DbContext
     {
         public ShopEntities()
             : base("name=ShopEntities")
@@ -29,7 +28,7 @@ namespace Catalog.Common.Service
         public virtual DbSet<Location> Locations { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductCategory> ProductCategories { get; set; }
-        public virtual DbSet<ProductPhoto> ProductPhotoes { get; set; }
+        public virtual DbSet<ProductPhoto> ProductPhotos { get; set; }
         public virtual DbSet<ProductSubcategory> ProductSubcategories { get; set; }
         public virtual DbSet<TransactionHistory> TransactionHistories { get; set; }
         public virtual DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }

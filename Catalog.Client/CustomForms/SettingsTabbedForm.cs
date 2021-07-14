@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Windows.Forms;
+
 using Telerik.WinControls.UI;
+using Telerik.WinControls;
 
 using Catalog.Client.Properties;
 using Catalog.Common.Repository;
-using System.Threading.Tasks;
-using Telerik.WinControls;
 
 namespace Catalog.Client
 {
@@ -17,13 +20,13 @@ namespace Catalog.Client
 			InitializeComponent();
 
 			this.AllowAero = false;
-			this.ShowInTaskbar = false;
+			this.ShowInTaskbar = true;
 			this.AcceptButton = this.submitButton;
 			this.CancelButton = this.cancelButton;
 
-			this.radConfirmCheckBox.Checked = Settings.AskConfirmation;
-			this.radLoadImageCheckBox.Checked = Settings.LoadImages;
-			this.updateItervalSpinControl.Value = Settings.UpdateInterval;
+			this.radConfirmCheckBox.Checked = Settings.Default.AskConfirmation;
+			this.radLoadImageCheckBox.Checked = Settings.Default.LoadImage;
+			this.updateItervalSpinControl.Value = Settings.Default.UpdateInterval;
 
 			this.updateButton.Click += UpdateButton_Click;
 			this.submitButton.Click += SubmitButton_Click;
@@ -34,50 +37,32 @@ namespace Catalog.Client
 
 			this.radTabFormControl.SelectedTab = this.radCommonTab;
 
+			this.updateButton.Enabled = WebWorker.UpdateStatus != Common.UpdateStatus.Started;
 
-			this.updateItervalSpinControl.Value = Properties.Settings.UpdateInterval;
 		}
-		private void UpdateStatus(string status)
+
+		private void UpdateStatus(string status, Object statusTextAlignment = null)
 		{
 			Invoke(new Action(() => MainForm.StatusLabelElement.Text = status));
 		}
 
-		private async void UpdateButton_Click(Object sender, EventArgs e)
+		private void UpdateButton_Click(Object sender, EventArgs e)
 		{
-			if (WebRepository.HasConnection)
-			{
-				await Task.Run(() =>
-				{
-					Invoke(new Action(() => MainForm.StatusLabelElement.Text = "Обновление..."));
-					WebRepository.UpdateRequested = true;
-					UpdateStatus("Обновление категорий...");
-					WebRepository.GetProductCategories();
-					WebRepository.GetProductSubcategories();
-					UpdateStatus("Обновление товаров...");
-					WebRepository.GetProducts();
-					WebRepository.GetProductInventories();
-					MainRepository.ResetCache(CacheType.INVENTORY);
-					WebRepository.UpdateRequested = false;
-
-					UpdateStatus($"<html>Обновлено <b>{WebRepository.ProductInventoryUpdateCount}</b> товаров");
-				});
-			}
-			else
-				RadMessageBox.Show("Отсутсвует соединение. Повторите позже.");
+			new Thread(new ThreadStart(UpdateData)).Start();
 		}
 
 		private void SubmitButton_Click(Object sender, EventArgs e)
 		{
-			Settings.AskConfirmation = this.radConfirmCheckBox.Checked;
-			Settings.LoadImages = this.radLoadImageCheckBox.Checked;
-			Settings.UpdateInterval = Convert.ToInt32(this.updateItervalSpinControl.Value);
-			Settings.Commit();
-			Hide();
+			Settings.Default.AskConfirmation = this.radConfirmCheckBox.Checked;
+			Settings.Default.LoadImage = this.radLoadImageCheckBox.Checked;
+			Settings.Default.UpdateInterval = Convert.ToInt32(this.updateItervalSpinControl.Value);
+			Settings.Default.Commit();
+			Close();
 		}
 
 		private void CancelButton_Click(Object sender, EventArgs e)
 		{
-			Hide();
+			Close();
 		}
 
 		private void LoginButton_Click(Object sender, EventArgs e)
@@ -85,14 +70,45 @@ namespace Catalog.Client
 
 		}
 
+		private void UpdateData()
+		{
+			if (WebWorker.HasConnection
+				&& WebWorker.UpdateStatus != Common.UpdateStatus.Started)
+			{
+				Invoke(new Action(() => { this.updateButton.Enabled = false; }));
+				WebWorker.LoggingCallback = UpdateStatus;
+				WebWorker.UpdateStatus = Common.UpdateStatus.Started;
+				WebWorker.InitProductCategories();
+				WebWorker.InitProductSubcategories();
+				UpdateStatus("Обновление товаров...");
+				var count = WebWorker.InitProducts();
+				if (Settings.Default.LoadImage && !WebWorker.PhotosUpdating)
+				{
+					UpdateStatus("Обновление картинок...");
+					Task.Run(WebWorker.InitProductPhotos);
+				}
+
+				MainRepository.ResetCache();
+				WebWorker.UpdateStatus = Common.UpdateStatus.Finished;
+
+				UpdateStatus($"<html>Обновлено <b>{count}</b> товаров");
+
+				WebWorker.LoggingCallback = null;
+
+				Invoke(new Action(() => { this.updateButton.Enabled = true; }));
+			}
+			else
+				RadMessageBox.Show("Отсутсвует соединение. Повторите позже.");
+		}
+
 		private void RegistrationLinkClickedEvent(Object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			Process.Start(Settings.Default.authURL);
+			Process.Start(Properties.Settings.Default.authURL);
 		}
 
 		private void ForgotLinkClickedEvent(Object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			Process.Start(Settings.Default.authURL);
+			Process.Start(Properties.Settings.Default.authURL);
 		}
 	}
 }

@@ -4,15 +4,30 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 using Catalog.Common.Service;
+using System.Data.Entity.Validation;
+using System.Data.Entity.Infrastructure;
 
 namespace Catalog.Common.Repository
 {
 	public abstract class Repository
 	{
-		public static ShopEntities Context { get => ConnectionManager.Context; }
+		public static ShopEntities Context => DatabaseManager.Context; 
 
 		static Repository()
 		{
+		}
+
+		public static int DropConstraint(string constraintName, string tableName)
+		{
+			return Context.Database.ExecuteSqlCommand(
+				$"IF OBJECT_ID(N'[dbo].[{constraintName}]', 'F') IS NOT NULL " +
+					$"ALTER TABLE[dbo].[{tableName}] DROP CONSTRAINT[{constraintName}]"
+				);
+		}
+
+		public static void DropTable(string tableName)
+		{
+			Context.Database.ExecuteSqlCommand($"DROP TABLE [dbo].[{tableName}];");
 		}
 
 		protected static async void ExecuteQueryAsync<T>(
@@ -37,7 +52,7 @@ namespace Catalog.Common.Repository
 		{
 			try
 			{
-				//Context.UpdateObject(entity);
+				Context.SaveChanges();
 			}
 			catch (Exception ex)
 			{
@@ -50,30 +65,21 @@ namespace Catalog.Common.Repository
 			await Task.Run(() => SaveChanges(callback));
 		}
 
-		public static void UpdateAndSaveAsync(object entity)
-		{
-			try
-			{
-				Update(entity);
-				SaveChangesAsync();
-			}
-			catch (Exception ex)
-			{
-
-				Debug.WriteLine("Exception", ex.Message);
-			}
-		}
-
 		public static void SaveChanges(Action callback = null)
 		{
 			try
 			{
 				Context.SaveChanges();
 				callback?.Invoke();
+			} catch (DbUpdateException dbe)
+			{
+				Debug.WriteLine($"1. Error occurred while saving changes: {dbe.Message}\n" +
+								$"StackTrace:\n{dbe.StackTrace}\n" +
+								$"Detailed message:\n{dbe.InnerException?.Message}");
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine($"Error occurred while saving changes: {ex.Message}\n" +
+				Debug.WriteLine($"2. Error occurred while saving changes: {ex.Message}\n" +
 								$"StackTrace:\n{ex.StackTrace}\n" +
 								$"Detailed message:\n{ex.InnerException?.Message}");
 

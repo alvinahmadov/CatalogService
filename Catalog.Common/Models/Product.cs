@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using Catalog.Common.Repository;
 
@@ -8,7 +9,7 @@ namespace Catalog.Common.Service
 	public partial class Product : EntityModel
 	{
 		public Product(
-			int id,
+			int productId,
 			string articleNumber,
 			string code,
 			string brand,
@@ -17,7 +18,7 @@ namespace Catalog.Common.Service
 			decimal price
 		)
 		{
-			this.ProductID = id;
+			this.ProductID = productId;
 			this.ArticleNumber = articleNumber;
 			this.Code = code;
 			this.Brand = brand;
@@ -35,46 +36,74 @@ namespace Catalog.Common.Service
 			try
 			{
 				if (isAddingItem)
+				{
 					Repository.Repository.Context.Products.Add(this);
+				}
 
 				if (commit)
+				{
+					Debug.WriteLine("Commit at Product.Save");
 					Commit();
+				}
 			}
 			catch { }
 		}
 
-		public override void Update(object entity, bool commit = false)
+		public override bool Update(object entity, bool commit = false)
 		{
-			var product = entity as Product;
+			var other = entity as Product;
 
-			if (this.ProductID != product.ProductID &&
-				this.ArticleNumber != product.ArticleNumber &&
-				this.Code != product.Code &&
-				this.Brand != product.Brand &&
-				this.Name != product.Name &&
-				this.Description != product.Description &&
-				this.Price.CompareTo(product.Price) != 0 &&
-				this.ProductSubcategoryID != product.ProductSubcategoryID
-			)
+			if (!Equals(other))
 			{
-				this.ProductID = product.ProductID;
-				this.ArticleNumber = product.ArticleNumber;
-				this.Code = product.Code;
-				this.Brand = product.Brand;
-				this.Name = product.Name;
-				this.Description = product.Description;
-				this.Price = product.Price;
-				this.ProductSubcategoryID = product.ProductSubcategoryID;
-				if (commit)
-					Save(!commit, commit);
+				this.ProductID = other.ProductID;
+				this.ArticleNumber = other.ArticleNumber;
+				this.Code = other.Code;
+				this.Brand = other.Brand;
+				this.Name = other.Name;
+				this.Description = other.Description;
+				this.Price = other.Price;
+
+				return true;
 			}
 
+			return false;
 		}
 
 		public override void Delete()
 		{
 			Repository.Repository.Context.Products.Remove(this);
-			Commit();
+			Save(false, true);
+		}
+
+		public override String ToString()
+		{
+			return $"Product <[" +
+			$"ProductID: {this.ProductID}, " +
+			$"ArticleNumber: {this.ArticleNumber}, " +
+			$"Code: {this.Code}, Brand: {this.Brand}, " +
+			$"Name: {this.Name}, Price: {this.Price}" +
+			$"]>";
+		}
+
+		public override Boolean Equals(Object obj)
+		{
+			if (obj == null)
+				return false;
+
+			var other = obj as Product;
+
+			return (this.ProductID == other.ProductID)
+			&& (this.ArticleNumber == other.ArticleNumber)
+			&& (this.Code == other.Code)
+			&& (this.Brand == other.Brand)
+			&& (this.Name == other.Name)
+			&& (this.Description == other.Description)
+			&& (this.Price == other.Price);
+		}
+
+		public override Int32 GetHashCode()
+		{
+			return base.GetHashCode();
 		}
 	}
 }

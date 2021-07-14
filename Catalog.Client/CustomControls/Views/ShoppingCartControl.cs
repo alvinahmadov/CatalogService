@@ -12,37 +12,46 @@ using Telerik.WinControls.UI;
 using Telerik.Windows.Documents.Spreadsheet.Model;
 using Telerik.Windows.Documents.Spreadsheet.FormatProviders.OpenXml.Xlsx;
 
+using Catalog.Common;
 using Catalog.Common.Repository;
 using Catalog.Common.Service;
 using Catalog.Client.Properties;
-using Catalog.Common.Utils;
 
-using FilterPredicate = System.Linq.Expressions.Expression<System.Func<Catalog.Common.Service.ShoppingCart, bool>>;
-
+using FilterPredicate = System.Linq.Expressions.Expression<System.Func<Catalog.Common.Service.ShoppingCart, System.Boolean>>;
+using System.Diagnostics;
 
 namespace Catalog.Client
 {
-	class ShoppingCartControl : BaseGridControl
+	sealed class ShoppingCartControl : BaseGridControl
 	{
 		#region Properties
 
-		Action<DbQuery<ShoppingCart>> QueryCallback { get; set; }
-
 		VirtualGridViewInfo ChildViewInfo { get; set; }
 
-		RadButton AcceptButton { get; set; }
+		//RadButton AcceptButton { get; set; }
 
+		/// <summary>
+		/// Removes cart and it's items from list
+		/// </summary>
 		Action RemoveCartCallback { get; set; }
 
+		/// <summary>
+		/// Removes cart item from list
+		/// </summary>
 		Action<int, Inventory> CartItemCallback { get; set; }
+
+		/// <summary>
+		/// Used to fill cart with products
+		/// </summary>
+		Action<DbQuery<ShoppingCart>> QueryCallback { get; set; }
 
 		#endregion
 
 		#region Initializers
 
-		public ShoppingCartControl() : base(null)
+		public ShoppingCartControl()
 		{
-			AcceptButton = new RadButton
+			this.radAcceptButton = new RadButton
 			{
 				Text = "Отправить",
 				BackColor = SystemColors.ButtonFace,
@@ -54,70 +63,22 @@ namespace Catalog.Client
 				TabIndex = 4,
 				TextImageRelation = TextImageRelation.ImageBeforeText,
 			};
-			this.GridControl.MasterViewInfo.MinColumnWidth = 100;
 			var ctrl = this.radTableLayoutPanel.GetControlFromPosition(0, 0);
 			this.radTableLayoutPanel.Controls.Remove(ctrl);
-			this.radTableLayoutPanel.Controls.Add(AcceptButton, 2, 0);
-
-			AcceptButton.Click += AcceptButton_Click;
+			this.radTableLayoutPanel.Controls.Add(this.radAcceptButton, 2, 0);
+			this.radAcceptButton.Click += AcceptButton_Click;
+			this.GridControl.MasterViewInfo.MinColumnWidth = 100;
 		}
 
 		protected override void Initialize()
 		{
 			this.exportFileName = "Корзина.xlsx";
-			columnTypes = new Type[]
-			{
-				typeof(byte),
-				typeof(int),
-				typeof(decimal),
-				typeof(DateTime),
-				typeof(DateTime),
-			};
-
-			this.columnNames.Add("Статус");
-			this.columnNames.Add("Общее количество");
-			this.columnNames.Add("Общая сумма");
-			this.columnNames.Add("Дата изменения");
-			this.columnNames.Add("Удалить все");
-
+			this.columnNames = ColumnNamesHelper.ShoppingCart;
+			this.detailColumnNames = ColumnNamesHelper.ShoppingCartItem;
 			this.GridControl.ColumnCount = columnNames.Count;
+			this.GridControl.MasterViewInfo.SetColumnDataType(ColumnTypesHelper.ShoppingCart);
 
-			this.detailColumnNames.Add("Фото");
-			this.detailColumnNames.Add("Артикул");
-			this.detailColumnNames.Add("Код");
-			this.detailColumnNames.Add("Бренд");
-			this.detailColumnNames.Add("Наименование товара");
-			this.detailColumnNames.Add("Цена за единицу");
-			this.detailColumnNames.Add("Дата изменения");
-			this.detailColumnNames.Add("Дата добавления");
-			this.detailColumnNames.Add("Количество");
-			this.detailColumnNames.Add("Удалить");
-
-			this.GridControl.MasterViewInfo.SetColumnDataType(columnTypes);
-
-			this.QueryCallback = query =>
-			{
-				this.data = query.ToList();
-				this.GridControl.RowCount = this.data.Count;
-
-				if (data.Count > 0)
-				{
-					this.GridControl.ColumnCount = columnNames.Count;
-					this.DataLoaded = true;
-					RefreshDetailsData();
-				}
-				else GridControl.ColumnCount = 0;
-
-				this.GridControl.MasterViewInfo.AllowColumnResize = false;
-				this.GridControl.MasterViewInfo.IsWaiting = false;
-
-				this.AcceptButton.Enabled = data.Count > 0;
-				this.ExportButton.Enabled = data.Count > 0;
-
-
-				this.GridControl.TableElement.SynchronizeRows(true, true);
-			};
-
+			/// Used to delete cart and its items from list
 			RemoveCartCallback = () =>
 			{
 				if (data.Count == 0)
@@ -136,10 +97,11 @@ namespace Catalog.Client
 					cart.TotalPrice = 0M;
 					cart.Status = (byte)(ShoppingCartStatus.Pending);
 
+					Debug.WriteLine("Commit at ShoppingCartControl.RemoveCartCallback");
 					EntityModel.Commit();
 
 					var shoppingStatus = String.Format(
-						StatusTemplate.ORDERS_STATUS_TEMPLATE,
+						MESSAGE.Gui.ORDERS_STATUS_TEMPLATE,
 						cart.TotalQuantity,
 						CultureConfig.CurrencyInfo.Format(cart.TotalPrice)
 					);
@@ -150,6 +112,7 @@ namespace Catalog.Client
 				RefreshData();
 			};
 
+			/// Used to delete cart item from list
 			CartItemCallback = (rowIndex, inventory) =>
 			{
 				try
@@ -164,24 +127,24 @@ namespace Catalog.Client
 							cart.TotalQuantity = Inventory.ShoppingCart.TotalQuantity;
 							cart.TotalPrice = Inventory.ShoppingCart.TotalPrice;
 							cartItem.Quantity = inventory.Quantity;
-						} else 
+						}
+						else
 						{
 							cart.TotalQuantity -= cartItem.Quantity;
 							cart.TotalPrice -= cartItem.Quantity * cartItem.UnitPrice;
 							cartItem.Quantity = 0;
 						}
 
-						cart.Status = (byte) ShoppingCartStatus.Pending;
+						cart.Status = (byte)ShoppingCartStatus.Pending;
 
 						var shoppingStatus = String.Format(
-							StatusTemplate.ORDERS_STATUS_TEMPLATE,
+							MESSAGE.Gui.ORDERS_STATUS_TEMPLATE,
 							cart.TotalQuantity,
 							CultureConfig.CurrencyInfo.Format(cart.TotalPrice)
 						);
 
 						TopButton.Text = shoppingStatus;
 						MainForm.StatusLabelElement.Text = shoppingStatus;
-
 						EntityModel.Commit();
 
 						RefreshDetailsData();
@@ -195,21 +158,32 @@ namespace Catalog.Client
 				{ }
 			};
 
+			/// Used to fill cart with products
+			QueryCallback = query =>
+			{
+				this.data = query.ToList();
+				this.GridControl.RowCount = this.data.Count;
+
+				if (data.Count > 0)
+				{
+					this.GridControl.ColumnCount = columnNames.Count;
+					this.DataLoaded = true;
+					RefreshDetailsData();
+				}
+				else GridControl.ColumnCount = 0;
+
+				this.radAcceptButton.Enabled = data.Count > 0;
+				this.radExportButton.Enabled = data.Count > 0;
+
+				this.GridControl.MasterViewInfo.AllowColumnResize = false;
+				this.GridControl.MasterViewInfo.IsWaiting = false;
+				this.GridControl.TableElement.SynchronizeRows(true, true);
+			};
+
 			this.GridControl.QueryHasChildRows += GridControl_QueryHasChildRows;
 			this.GridControl.CellFormatting += GridControl_CellFormatting;
 			this.GridControl.RowExpanding += GridControl_RowExpanding;
 			this.GridControl.ScreenTipNeeded += GridControl_ScreenTipNeeded;
-		}
-
-		private void SendMail(TransactionHistory transaction)
-		{
-			var formatProvider = new XlsxFormatProvider();
-			var workbook = CreateWorkbook();
-			var data = formatProvider.Export(workbook);
-
-			string message = $"Заказ #{transaction.TransactionID}\nID клиента: 0\n";
-
-			WebRepository.SendMail(data, exportFileName, message);
 		}
 
 		#endregion
@@ -226,7 +200,7 @@ namespace Catalog.Client
 			FilterDataAsync(c => c.TotalQuantity > 0);
 		}
 
-		protected void RefreshDetailsData()
+		private void RefreshDetailsData()
 		{
 			this.detailsData = data[0].ShoppingCartItems
 									  .Where(c => c.Quantity > 0)
@@ -265,73 +239,34 @@ namespace Catalog.Client
 			ExecuteQueryAsync(task, QueryCallback);
 		}
 
+		/// <summary>
+		/// Creates an Workbook file for sending products list as attached file in mail
+		/// </summary>
+		/// <param name="transaction">
+		///		Transaction item
+		/// </param>
+		/// 
+		private void SendMail(TransactionHistory transaction)
+		{
+			var workbook = CreateWorkbook();
+			var formatProvider = new XlsxFormatProvider();
+			byte[] data = formatProvider.Export(workbook);
+			string message = String.Format(MESSAGE.Mail.BODY, transaction.TransactionID, 0);
+
+			Mail.Send(data, exportFileName, message);
+		}
+
 		#endregion
 
 		#region Event handlers
 
-		private void OnLoad(Object sender, EventArgs e)
+		protected override void OnLoad(EventArgs e)
 		{
 			base.OnLoad(e);
 			RefreshData();
 		}
 
-		private async void AcceptButton_Click(Object sender, EventArgs e)
-		{
-			if (Properties.Settings.AskConfirmation)
-			{
-				var dialogResult = RadMessageBox.Show(
-					"Хотите продолжить?",
-					"<html><b>Подтверждение</b>",
-					MessageBoxButtons.OKCancel
-				);
-
-				if (dialogResult == DialogResult.Cancel)
-					return;
-			}
-
-			var cart = data[0];
-
-			if (!WebRepository.HasConnection)
-			{
-				RadMessageBox.Show(
-								"Отсутствует соединение с сетью, пожалуйста, подключитесь к сети и" +
-								" повторите попытку снова!",
-								"<html><b>Подключение</b>"
-							);
-
-				cart.Status = (byte)ShoppingCartStatus.Pending;
-				cart.Save(false, true);
-				return;
-			}
-
-			cart.Status = (byte)ShoppingCartStatus.Ordered;
-
-			await Task.Run(() =>
-			{
-				var transactionHistory = new TransactionHistory()
-				{
-					TransactionDate = DateTime.Now,
-					Quantity = cart.TotalQuantity,
-					TotalCost = cart.TotalPrice,
-					ModifiedDate = DateTime.Now
-				};
-
-				Repository.Context.TransactionHistories.Add(transactionHistory);
-
-				Repository.SaveChanges(
-					() => RadMessageBox.Show(
-							$"Заказ №{transactionHistory.TransactionID} принят.\nЖдите подтверждение оператора.",
-							caption: "Успех!",
-							buttons: MessageBoxButtons.OK
-						)
-				);
-
-				SendMail(transactionHistory);
-			});
-			RemoveCartCallback();
-		}
-
-		protected override void GridControl_CreateCellElement(object sender, VirtualGridCreateCellEventArgs e)
+		protected override void GridControl_CreateCellElement(Object sender, VirtualGridCreateCellEventArgs e)
 		{
 			if (e.ViewInfo != this.GridControl.MasterViewInfo) // ChildViewInfo
 			{
@@ -379,7 +314,7 @@ namespace Catalog.Client
 						case 4:
 							var removeCellElement = new RemoveCellElement(e.ColumnIndex)
 							{
-								Callback = index => 
+								Callback = index =>
 								{
 									RemoveCartCallback.Invoke();
 								}
@@ -393,7 +328,7 @@ namespace Catalog.Client
 			base.GridControl_CreateCellElement(sender, e);
 		}
 
-		protected override void GridControl_CellValueNeeded(object sender, VirtualGridCellValueNeededEventArgs e)
+		protected override void GridControl_CellValueNeeded(Object sender, VirtualGridCellValueNeededEventArgs e)
 		{
 			base.GridControl_CellValueNeeded(sender, e);
 
@@ -450,11 +385,11 @@ namespace Catalog.Client
 						var inventory = MainRepository.ProductInventoriesCache
 													  .Where(pi => pi.ProductID == rowData.ProductID)
 													  .SingleOrDefault();
-						var photo = Properties.Settings.LoadImages
+						var photo = Properties.Settings.Default.LoadImage
 												? MainRepository.ProductPhotoCache.Find(p => p.ProductID == rowData.ProductID)
 												: null;
 
-						Image image = ImageUtils.GetImage(photo?.ThumbNailPhoto, Resources.placeholder);
+						Image image = ImageUtil.GetImage(photo?.ThumbNailPhoto, Resources.placeholder);
 
 						switch (e.ColumnIndex)
 						{
@@ -495,7 +430,18 @@ namespace Catalog.Client
 			}
 		}
 
-		protected void GridControl_CellFormatting(object sender, VirtualGridCellElementEventArgs e)
+		protected override void GridControl_SortChanged(Object sender, VirtualGridEventArgs e)
+		{
+			if (e.ViewInfo.SortDescriptors.Count == 0)
+				return;
+
+			var propertyName = e.ViewInfo.SortDescriptors[0].PropertyName;
+
+			if (propertyName == "OrderStatus")
+				return;
+		}
+
+		private void GridControl_CellFormatting(Object sender, VirtualGridCellElementEventArgs e)
 		{
 			if (e.CellElement is VirtualGridHeaderCellElement)
 			{
@@ -527,7 +473,7 @@ namespace Catalog.Client
 						case 0:
 							{
 								// ProductPhoto
-								if (e.CellElement.Value is Image image)
+								if (e.CellElement.Value is System.Drawing.Image image)
 								{
 									e.CellElement.Text = String.Empty;
 									e.CellElement.Image = image;
@@ -544,21 +490,19 @@ namespace Catalog.Client
 			}
 		}
 
-		private void GridControl_QueryHasChildRows(object sender, VirtualGridQueryHasChildRowsEventArgs e)
+		private void GridControl_QueryHasChildRows(Object sender, VirtualGridQueryHasChildRowsEventArgs e)
 		{
 			e.HasChildRows = e.ViewInfo == this.GridControl.MasterViewInfo;
 		}
 
-		private void GridControl_RowExpanding(object sender, VirtualGridRowExpandingEventArgs e)
+		private void GridControl_RowExpanding(Object sender, VirtualGridRowExpandingEventArgs e)
 		{
 			this.GridControl.TableElement.SynchronizeRows();
 		}
 
-		protected void GridControl_ScreenTipNeeded(Object sender, ScreenTipNeededEventArgs e)
+		private void GridControl_ScreenTipNeeded(Object sender, ScreenTipNeededEventArgs e)
 		{
-			//var cell = e.Item as VirtualGridCellElement;
-			if (e.Item is VirtualGridCellElement cell
-				&& cell.ViewInfo != GridControl.MasterViewInfo)
+			if (e.Item is VirtualGridCellElement cell && cell.ViewInfo != GridControl.MasterViewInfo)
 			{
 				var cellIndex = cell.RowIndex;
 				if (cell != null && cellIndex >= 0)
@@ -574,15 +518,58 @@ namespace Catalog.Client
 			}
 		}
 
-		protected override void GridControl_SortChanged(object sender, VirtualGridEventArgs e)
+		private async void AcceptButton_Click(Object sender, EventArgs e)
 		{
-			if (e.ViewInfo.SortDescriptors.Count == 0)
-				return;
+			if (Properties.Settings.Default.AskConfirmation)
+			{
+				var dialogResult = RadMessageBox.Show(
+													MESSAGE.Gui.CONFIRM_ACTION,
+													"<html><b>Подтверждение</b>",
+													MessageBoxButtons.OKCancel
+													);
 
-			var propertyName = e.ViewInfo.SortDescriptors[0].PropertyName;
+				if (dialogResult == DialogResult.Cancel)
+					return;
+			}
 
-			if (propertyName == "OrderStatus")
+			var cart = data[0];
+
+			if (!WebWorker.HasConnection)
+			{
+				RadMessageBox.Show(
+								MESSAGE.Gui.ON_CONNECT_ERROR_TRANSACTION,
+								"<html><b>Подключение</b>"
+								);
+				cart.Status = (byte)ShoppingCartStatus.Pending;
+				cart.Save(false, true);
 				return;
+			}
+
+			cart.Status = (byte)ShoppingCartStatus.Ordered;
+
+			await Task.Run(() =>
+			{
+				var transactionHistory = new TransactionHistory()
+				{
+					TransactionDate = DateTime.Now,
+					Quantity = cart.TotalQuantity,
+					TotalCost = cart.TotalPrice,
+					ModifiedDate = DateTime.Now
+				};
+
+				Repository.Context.TransactionHistories.Add(transactionHistory);
+
+				Repository.SaveChanges(
+					() => RadMessageBox.Show(
+											MESSAGE.Gui.ON_SUCCESS_TRANSACTION,
+											caption: "Успех!",
+											buttons: MessageBoxButtons.OK
+											)
+				);
+
+				SendMail(transactionHistory);
+			});
+			RemoveCartCallback();
 		}
 
 		#endregion
@@ -685,13 +672,15 @@ namespace Catalog.Client
 
 		#endregion
 
-		#region Private members
+		#region Fields
 
-		List<ShoppingCart> data = new List<ShoppingCart>();
+		private RadButton radAcceptButton;
 
-		List<ShoppingCartItem> detailsData = new List<ShoppingCartItem>();
+		private List<ShoppingCart> data = new List<ShoppingCart>();
 
-		readonly List<QuantityCellElement> cellElements = new List<QuantityCellElement>();
+		private List<ShoppingCartItem> detailsData = new List<ShoppingCartItem>();
+
+		private readonly List<QuantityCellElement> cellElements = new List<QuantityCellElement>();
 
 		#endregion
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Catalog.Common.Service
 {
@@ -19,25 +20,35 @@ namespace Catalog.Common.Service
 			try
 			{
 				if (isAddingItem)
+				{
 					Repository.Repository.Context.ProductSubcategories.Add(this);
+				}
 
 				if (commit)
+				{
+					Debug.WriteLine("Commit at ProductSubcategory.Save");
 					Commit();
+				}
 			}
 			catch { }
 		}
 
-		public override void Update(object entity, bool commit = false)
+		public override bool Update(object entity, bool commit = false)
 		{
 			var category = entity as Product;
 
-			if (this.Name != category.Name)
+			if (this.Name.CompareTo(category.Name) != 0)
 			{
+				Debug.WriteLine($"Updating subcategory {this.Name}");
 				this.Name = category.Name;
 				this.ModifiedDate = DateTime.Now;
 				if (commit)
 					Save(!commit, commit);
+
+				return true;
 			}
+
+			return false;
 
 		}
 

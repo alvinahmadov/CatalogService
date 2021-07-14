@@ -6,9 +6,9 @@ using System.Data.Entity;
 
 using Telerik.WinControls.UI;
 
+using Catalog.Common;
 using Catalog.Common.Repository;
 using Catalog.Common.Service;
-using Catalog.Common.Utils;
 
 namespace Catalog.Client
 {
@@ -60,6 +60,7 @@ namespace Catalog.Client
 		{
 			ShoppingCartItem.ModifiedDate = DateTime.Now;
 			ShoppingCart.ModifiedDate = DateTime.Now;
+			Debug.WriteLine("Commit at Inventory.Update");
 			EntityModel.Commit(async);
 		}
 	}
@@ -91,10 +92,10 @@ namespace Catalog.Client
 
 		public InventoryCollection()
 		{
-			InitializeShoppingCart();
+			InitShoppingCart();
 		}
 
-		private static void InitializeShoppingCart()
+		private static void InitShoppingCart()
 		{
 			if (shoppingCart != null)
 				return;
@@ -115,16 +116,20 @@ namespace Catalog.Client
 			Inventory.ShoppingCart = shoppingCart;
 		}
 
-		private static void InitializeShoppingCartItem(int productID, Inventory inventory)
+		private static void InitShoppingCartItem(Inventory inventory)
 		{
+			int productID = inventory.ProductID;
 			var cartItem = shoppingCartItems.Find(si => si.ProductID == productID);
 
 			try
 			{
 				if (cartItem is null)
-					cartItem = Repository.Context.ShoppingCartItems
-												 .Where(ci => productID == ci.ProductID)
-												 .SingleOrDefault();
+				{
+					cartItem = Repository.Context
+										 .ShoppingCartItems
+										 .Where(item => productID == item.ProductID)
+										 .SingleOrDefault();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -133,31 +138,22 @@ namespace Catalog.Client
 				Debug.WriteLine($"Detailed message:\n{ex.InnerException?.Message}");
 			}
 
+			var product = Repository.Context
+									.Products
+									.Where(p => p.ProductID == productID)
+									.SingleOrDefault();
+
 			if (cartItem is null)
 			{
-				Decimal unitPrice = 0M;
-				var product = Repository.Context.Products
-												.Where(p => p.ProductID == productID)
-												.SingleOrDefault();
-				if (product?.Price != null)
-					unitPrice = product.Price;
-
-				cartItem = new ShoppingCartItem
-				{
-					ProductID = productID,
-					ShoppingCart = shoppingCart,
-					Quantity = 0,
-					UnitPrice = unitPrice,
-					rowguid = Guid.NewGuid(),
-					DateCreated = DateTime.Now,
-					ModifiedDate = DateTime.Now
-				};
+				cartItem = new ShoppingCartItem(shoppingCart, product);
 				cartItem.Save();
+				shoppingCartItems.Add(cartItem);
 			}
-			shoppingCart.ShoppingCartItems.Add(cartItem);
-			shoppingCart.Save(false);
-
-			shoppingCartItems.Add(cartItem);
+			else
+			{
+				if (cartItem.UnitPrice != product.Price)
+					cartItem.UnitPrice = product.Price;
+			};
 
 			inventory.ShoppingCartItem = cartItem;
 		}
@@ -177,7 +173,8 @@ namespace Catalog.Client
 
 		public Inventory Get(int productID)
 		{
-			return inventories.Find(qi => productID == qi.ProductID);
+			var inventory = inventories.Find(qi => productID == qi.ProductID);
+			return inventory;
 		}
 
 		public Inventory Get(int productID, out bool exists)
@@ -255,8 +252,8 @@ namespace Catalog.Client
 			if (!Exists(productID))
 			{
 				var inventory = new Inventory(productID, unitPrice);
-				InitializeShoppingCartItem(productID, inventory);
 				this.inventories.Add(inventory);
+				InitShoppingCartItem(inventory);
 			}
 		}
 
@@ -278,9 +275,8 @@ namespace Catalog.Client
 				var totalPrice = Inventory.ShoppingCart.TotalPrice;
 				var formattedPrice = totalPrice >= 0.00M ? totalPrice : 0.00M;
 
-				StatusButton.Text
-					= String.Format(
-								Properties.StatusTemplate.ORDERS_STATUS_TEMPLATE,
+				StatusButton.Text = String.Format(
+								MESSAGE.Gui.ORDERS_STATUS_TEMPLATE,
 								Inventory.ShoppingCart.TotalQuantity,
 								CultureConfig.CurrencyInfo.Format(formattedPrice)
 							);

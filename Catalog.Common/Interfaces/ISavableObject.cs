@@ -7,7 +7,7 @@ namespace Catalog.Common
     {
         void Save(bool isAddingItem = true, bool commit = false);
 
-        void Update(object entity, bool commit = false);
+        bool Update(object entity, bool commit = false);
 
         void Delete();
         

@@ -39,7 +39,7 @@
       <End Role="ProductPhoto" EntitySet="ProductPhotoes" />
       <End Role="Product" EntitySet="Products" />
     </AssociationSet>
-    <AssociationSet Name="ProductProductInventory" Association="Catalog.Common.Service.Store.ProductProductInventory">
+    <AssociationSet Name="ProductProductInventory" Association="Catalog.Common.Service.Store.FK_Product_ProductInventory">
       <End Role="Product" EntitySet="Products" />
       <End Role="ProductInventory" EntitySet="ProductInventories" />
     </AssociationSet>
@@ -202,14 +202,16 @@
     <Key>
       <PropertyRef Name="ID" />
     </Key>
-    <Property Name="ID" Type="int" Nullable="false" />
-    <Property Name="UpdateInterval" Type="int" Nullable="false" />
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="UpdateInterval" Type="int" Nullable="false" DefaultValue="30" />
     <Property Name="AskConfirmation" Type="bit" Nullable="false" DefaultValue="true" />
     <Property Name="LoadImage" Type="bit" Nullable="false" DefaultValue="true" />
     <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
   </EntityType>
   <Association Name="FK_Product_ProductSubcategory_ProductSubcategoryID">
-    <End Role="ProductSubcategory" Type="Catalog.Common.Service.Store.ProductSubcategories" Multiplicity="0..1" />
+    <End Role="ProductSubcategory" Type="Catalog.Common.Service.Store.ProductSubcategories" Multiplicity="0..1">
+      <OnDelete Action="Cascade" />
+    </End>
     <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="ProductSubcategory">
@@ -221,7 +223,9 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_SpecialOfferProduct_Product_ProductID">
-    <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
+    <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
     <End Role="SpecialOfferProduct" Type="Catalog.Common.Service.Store.SpecialOfferProducts" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="Product">
@@ -233,7 +237,9 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="FK_ProductSubcategory_ProductCategory_ProductCategoryID">
-    <End Role="ProductCategory" Type="Catalog.Common.Service.Store.ProductCategories" Multiplicity="1" />
+    <End Role="ProductCategory" Type="Catalog.Common.Service.Store.ProductCategories" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
     <End Role="ProductSubcategory" Type="Catalog.Common.Service.Store.ProductSubcategories" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="ProductCategory">
@@ -257,7 +263,9 @@
     </ReferentialConstraint>
   </Association>
   <Association Name="ProductPhotoProduct">
-    <End Role="ProductPhoto" Type="Catalog.Common.Service.Store.ProductPhotoes" Multiplicity="0..1" />
+    <End Role="ProductPhoto" Type="Catalog.Common.Service.Store.ProductPhotoes" Multiplicity="0..1">
+      <OnDelete Action="Cascade" />
+    </End>
     <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
     <ReferentialConstraint>
       <Principal Role="Product">
@@ -268,7 +276,7 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="ProductProductInventory">
+  <Association Name="FK_Product_ProductInventory">
     <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
     <End Role="ProductInventory" Type="Catalog.Common.Service.Store.ProductInventories" Multiplicity="0..1" />
     <ReferentialConstraint>
@@ -306,7 +314,9 @@
   </Association>
   <Association Name="ShoppingCartItemProduct">
     <End Role="ShoppingCartItem" Type="Catalog.Common.Service.Store.ShoppingCartItems" Multiplicity="0..1" />
-    <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1" />
+    <End Role="Product" Type="Catalog.Common.Service.Store.Products" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
     <ReferentialConstraint>
       <Principal Role="Product">
         <PropertyRef Name="ID" />
@@ -632,8 +642,8 @@
 					<Key>
 						<PropertyRef Name="ID" />
 					</Key>
-					<Property Name="ID" Type="Int32" Nullable="false" />
-					<Property Name="UpdateInterval" Type="Int32" Nullable="false" />
+					<Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+					<Property Name="UpdateInterval" Type="Int32" Nullable="false" DefaultValue="30" />
 					<Property Name="AskConfirmation" Type="Boolean" Nullable="false" DefaultValue="True" />
 					<Property Name="LoadImage" Type="Boolean" Nullable="false" DefaultValue="True" />
 					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" />

@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
-using Catalog.Client.Properties;
 using Catalog.Common.Repository;
-using Catalog.Common.Utils;
 using Telerik.WinControls.UI;
 
 

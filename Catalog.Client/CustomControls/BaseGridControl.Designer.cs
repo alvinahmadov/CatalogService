@@ -187,7 +187,7 @@ namespace Catalog.Client
 
         private RadVirtualGrid radVirtualGrid;
 		protected RadButton radExportButton;
-        private Telerik.WinControls.OldShapeEditor.CustomShape customShape1;
+		private Telerik.WinControls.OldShapeEditor.CustomShape customShape1;
         private CustomShape customShape2;
         private CustomShape customShape3;
 		protected RadTextBox radFromTextBox;

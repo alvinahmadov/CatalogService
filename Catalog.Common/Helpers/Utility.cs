@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.Globalization;
-using System.Net;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 
 using JsonToken = Newtonsoft.Json.Linq.JToken;
 
-
-namespace Catalog.Common.Utils
+namespace Catalog.Common
 {
 	public delegate void EventAction<TEvent>(Object sender, TEvent eventArgs);
 
@@ -20,7 +19,7 @@ namespace Catalog.Common.Utils
 		public int product;
 		public int quantity;
 
-		public OrderSave(int userId, int orderNumber, int productId, int productQuantity) 
+		public OrderSave(int userId, int orderNumber, int productId, int productQuantity)
 		{
 			userid = userId;
 			ordernumber = orderNumber;
@@ -28,107 +27,6 @@ namespace Catalog.Common.Utils
 			quantity = productQuantity;
 		}
 	}
-
-	#region Globalization
-
-	public static class DateTimeMoscow
-	{
-		public static DateTime UtcNow
-		{
-			get => DateTime.UtcNow.AddHours(3);
-		}
-	}
-
-	public enum CultureType
-	{
-		RU = 0,
-		US = 1,
-		GB = 2
-	}
-
-	public abstract class Culture
-	{
-		public CultureInfo CurrentCulture { get; private set; }
-		public static string FormatString { get; set; }
-		public static string FormatKey { get; set; }
-
-		public Culture(CultureType type = CultureType.RU)
-		{
-			FormatString = "";
-			switch (type)
-			{
-				case CultureType.US:
-					CurrentCulture = CultureInfo.GetCultureInfo("en-US");
-					break;
-				case CultureType.GB:
-					CurrentCulture = CultureInfo.GetCultureInfo("en-GB");
-					break;
-				case CultureType.RU:
-					CurrentCulture = CultureInfo.GetCultureInfo("ru-RU");
-					break;
-			}
-		}
-	}
-
-	public class CurrencyInfo : Culture
-	{
-		public static new string FormatString { get => "{0:C}"; }
-		public static new string FormatKey { get => "C"; }
-
-		public CurrencyInfo(CultureType type) : base(type)
-		{ }
-
-		public string Format(Decimal value, bool useBold = true)
-		{
-			string formatString = useBold ? $"<html><b>{FormatString}</b>" : FormatString;
-			return String.Format(formatString, value.ToString(FormatKey, CurrentCulture));
-		}
-	}
-
-	public class DateTimeInfo : Culture
-	{
-		public static new string FormatString { get => "{0:f}"; }
-
-		public static new string FormatKey { get => "f"; }
-
-		public DateTimeInfo(CultureType type) : base(type)
-		{ }
-
-		public string Format(DateTime value)
-		{
-			return String.Format(FormatString, value.ToString(CurrentCulture));
-		}
-	}
-
-	public static class CultureConfig
-	{
-		public static CultureType CurrentCultureType
-		{ get => CultureType.RU; }
-
-		public static DateTimeInfo DateTimeInfo
-		{
-			get
-			{
-				if (dateTimeInfo == null)
-					dateTimeInfo = new DateTimeInfo(CurrentCultureType);
-				return dateTimeInfo;
-			}
-		}
-
-		public static CurrencyInfo CurrencyInfo
-		{
-			get
-			{
-				if (currencyInfo == null)
-					currencyInfo = new CurrencyInfo(CurrentCultureType);
-				return currencyInfo;
-			}
-		}
-
-		private static DateTimeInfo dateTimeInfo = null;
-		private static CurrencyInfo currencyInfo = null;
-	}
-	#endregion
 
 	public static class Configuration
 	{
@@ -246,55 +144,162 @@ namespace Catalog.Common.Utils
 		}
 	}
 
-	public class DownloadManager : IDisposable
+	public static class ImageUtil
 	{
-		public WebClient WebClient { get; private set; }
-		public Uri BaseAddress { get; private set; }
+		private static int thumbnailSize;
+		private static int defaultSize;
 
-		public DownloadManager(string baseAddress)
+		public static int ThumbnailSize
 		{
-			this.BaseAddress = new Uri(baseAddress);
-			this.WebClient = new WebClient()
+			get
 			{
-				BaseAddress = baseAddress,
-				//Encoding = System.Text.Encoding.UTF8,
-			};
-
-			this.WebClient.Headers.Add(HttpRequestHeader.Accept, "image/jpg");
-			this.WebClient.Headers.Add(HttpRequestHeader.KeepAlive, "10");
+				if (thumbnailSize == 0) thumbnailSize = 60;
+				return thumbnailSize;
+			}
+			set { if (value >= 0) thumbnailSize = value; }
 		}
 
-		public void DownloadAsBytes(string filename, Action<Byte[]> callback)
+		public static int DefaultSize
 		{
-			try
+			get
 			{
-				var data = this.WebClient.DownloadData($"{this.BaseAddress}{filename}");
-				callback(data);
+				if (defaultSize == 0) defaultSize = 450;
+				return defaultSize;
 			}
-			catch (Exception ex)
+
+			set { if (value >= 0) defaultSize = value; }
+		}
+
+		public static System.Drawing.Image Resize(ref System.Drawing.Image image)
+		{
+			var destRect = new Rectangle(0, 0, ThumbnailSize, ThumbnailSize);
+			var destImage = new Bitmap(ThumbnailSize, ThumbnailSize);
+
+			destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+			using (var graphics = Graphics.FromImage(destImage))
 			{
-				Debug.WriteLine($"DownloadAsBytes: Thrown exception when executing task for {this.BaseAddress}{filename}");
-				System.Diagnostics.Debug.WriteLine($"Details: {ex.Message} {ex.InnerException?.Message}");
+				graphics.CompositingMode = CompositingMode.SourceCopy;
+				graphics.CompositingQuality = CompositingQuality.HighQuality;
+				graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+				graphics.SmoothingMode = SmoothingMode.HighQuality;
+				graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+				using (var wrapMode = new ImageAttributes())
+				{
+					wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+					graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+				}
+			}
+
+			return destImage;
+		}
+
+		public static System.Drawing.Image Resize(ref System.Drawing.Image image, int width, int height)
+		{
+			var destRect = new Rectangle(0, 0, width, height);
+			var destImage = new Bitmap(width, height);
+
+			destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+			using (var graphics = Graphics.FromImage(destImage))
+			{
+				graphics.CompositingMode = CompositingMode.SourceCopy;
+				graphics.CompositingQuality = CompositingQuality.HighQuality;
+				graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+				graphics.SmoothingMode = SmoothingMode.HighQuality;
+				graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+				using (var wrapMode = new ImageAttributes())
+				{
+					wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+					graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+				}
+			}
+
+			return destImage;
+		}
+
+		public static byte[] ToByteArray(ref System.Drawing.Image imageIn)
+		{
+			using (var ms = new System.IO.MemoryStream())
+			{
+				imageIn.Save(ms, ImageFormat.Jpeg);
+				return ms.ToArray();
 			}
 		}
 
-		public async void DownloadAsBytesAsync(string filename, Action<Byte[]> callback, bool save = false)
+		public static System.Drawing.Image GetImage(byte[] bytes, System.Drawing.Image defaultImage)
 		{
-			try
+			if (bytes == null || bytes.Length == 0)
+				return defaultImage;
+
+			using (var memstream = new System.IO.MemoryStream(bytes))
 			{
-				var data = await this.WebClient.DownloadDataTaskAsync($"{this.BaseAddress}{filename}");
-				callback(data);
-			}
-			catch (Exception ex)
-			{
-				Debug.WriteLine($"DownloadAsBytesAsync: Thrown exception when executing task for {this.BaseAddress}{filename}");
-				Debug.WriteLine($"Details: {ex.Message} {ex.InnerException?.Message}");
+				return System.Drawing.Image.FromStream(memstream);
 			}
 		}
 
-		public void Dispose()
+		public static System.Drawing.Image GetImage(byte[] bytes)
 		{
-			WebClient.Dispose();
+			if (bytes == null || bytes.Length == 0)
+				return null;
+
+			using (var memstream = new System.IO.MemoryStream(bytes))
+			{
+				return System.Drawing.Image.FromStream(memstream);
+			}
+		}
+
+		public static System.Drawing.Image GetThumbnailPhoto(ref System.Drawing.Image image)
+		{
+			return GetThumbNailImage<System.Drawing.Image>(ref image) as System.Drawing.Image;
+		}
+
+		public static System.Drawing.Image GetLargePhoto(ref System.Drawing.Image image)
+		{
+			return GetLargeImage<System.Drawing.Image>(ref image) as System.Drawing.Image;
+		}
+
+		public static Byte[] GetThumbnailPhotoBytes(ref System.Drawing.Image image)
+		{
+			return GetThumbNailImage<Byte[]>(ref image) as Byte[];
+		}
+
+		public static Byte[] GetLargePhotoBytes(ref System.Drawing.Image image)
+		{
+			return GetLargeImage<Byte[]>(ref image) as Byte[];
+		}
+
+		private static Object GetThumbNailImage<T>(ref System.Drawing.Image image)
+		{
+			var thumbnail = image.GetThumbnailImage(ThumbnailSize, ThumbnailSize, () => false, new IntPtr(0));
+
+			if (typeof(T) == typeof(System.Drawing.Image))
+			{
+				return thumbnail;
+			}
+			else if (typeof(T) == typeof(Byte[]))
+			{
+				var byteArray = ToByteArray(ref thumbnail);
+				return byteArray;
+			}
+			return default;
+		}
+
+		private static Object GetLargeImage<T>(ref System.Drawing.Image image)
+		{
+			var largePhoto = Resize(ref image, DefaultSize, DefaultSize);
+			if (typeof(T) == typeof(System.Drawing.Image))
+			{
+				return largePhoto;
+			}
+			else if (typeof(T) == typeof(Byte[]))
+			{
+				var byteArray = ToByteArray(ref largePhoto);
+				return byteArray;
+			}
+			return default;
 		}
 	}
 }

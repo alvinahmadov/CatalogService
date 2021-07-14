@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-
-using Catalog.Common.Repository;
+using System.Diagnostics;
 
 namespace Catalog.Common.Service
 {
 	public partial class ShoppingCart : EntityModel
 	{
-		public ShoppingCart()
-		{	
-			this.ShoppingCartID = 1;
-			this.Status = 1;
+		public ShoppingCart(ShoppingCartStatus shoppingCartStatus)
+		{
+			this.Status = (byte)shoppingCartStatus;
 			this.TotalQuantity = 0;
 			this.TotalPrice = 0m;
 			this.DateCreated = DateTime.Now;
@@ -23,15 +21,21 @@ namespace Catalog.Common.Service
 			try
 			{
 				if (isAddingItem)
+				{
 					Repository.Repository.Context.ShoppingCarts.Add(this);
-					
+				}
+
+
 				if (commit)
+				{
+					Debug.WriteLine("Commit at ShoppingCart.Save");
 					Commit();
+				}
 			}
 			catch { }
 		}
 
-		public override void Update(object entity, bool commit)
+		public override bool Update(object entity, bool commit)
 		{
 			var cart = entity as ShoppingCart;
 
@@ -47,14 +51,17 @@ namespace Catalog.Common.Service
 				this.ModifiedDate = DateTime.Now;
 				if (commit)
 					Save(!commit, commit);
+
+				return true;
 			}
 
+			return false;
 		}
 
 		public override void Delete()
 		{
 			Repository.Repository.Context.ShoppingCarts.Remove(this);
-			Commit();
+			Save(false, true);
 		}
 	}
 }
