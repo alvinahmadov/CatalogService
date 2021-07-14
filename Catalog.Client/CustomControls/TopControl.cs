@@ -26,7 +26,8 @@ namespace Catalog.Client
 			this.Visible = false;
 			InitializeComponent();
 			this.radLayoutControl.Visible = false;
-			this.radSettingsDialog = null;
+
+			this.radSettingsDialog = new SettingsTabbedForm();
 			this.radSettingsButton.Click += RadSettingsButton_Click;
 
 			this.radSearchTextBox.Size = new Size(200, 100);
@@ -34,7 +35,6 @@ namespace Catalog.Client
 			this.radSearchTextBox.NullText = "Найти";
 
 			this.Margin = new Padding(0);
-			//this.Load += TopControl_Load;
 			this.VisibleChanged += TopControl_VisibleChanged;
 		}
 
@@ -45,12 +45,11 @@ namespace Catalog.Client
 
 		private void TopControl_Load(Object sender, EventArgs e)
 		{
-			radSettingsDialog.Hide();
+			this.radSettingsDialog.Hide();
 		}
 
 		private void RadSettingsButton_Click(Object sender, EventArgs e)
 		{
-			this.radSettingsDialog = new SettingsTabbedForm();
 			this.radSettingsDialog.Show();
 		}
 

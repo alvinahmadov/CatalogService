@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 07/13/2021 17:54:38
+-- Date Created: 07/14/2021 08:12:13
 -- Generated from EDMX file: C:\Users\Alvin\source\repos\Catalog\Catalog.Common\Service\ShopModel.edmx
 -- --------------------------------------------------
 
@@ -215,8 +215,8 @@ CREATE TABLE [dbo].[ProductInventories] (
     [ProductID] int  NOT NULL,
     [ProductCategoryID] int  NOT NULL,
     [ProductSubcategoryID] int  NULL,
-    [StockLevel1] nvarchar(5)  NOT NULL,
-    [StockLevel2] nvarchar(5)  NOT NULL,
+    [StockLevel1] nvarchar(max)  NOT NULL,
+    [StockLevel2] nvarchar(max)  NOT NULL,
     [Pack] nvarchar(max)  NOT NULL,
     [rowguid] uniqueidentifier  NOT NULL,
     [ModifiedDate] datetime  NOT NULL

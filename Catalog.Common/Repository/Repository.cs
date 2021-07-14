@@ -77,6 +77,20 @@ namespace Catalog.Common.Repository
 								$"StackTrace:\n{dbe.StackTrace}\n" +
 								$"Detailed message:\n{dbe.InnerException?.Message}");
 			}
+			catch (DbEntityValidationException ev)
+			{
+				foreach (var eve in ev.EntityValidationErrors)
+				{
+					Console.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:",
+						eve.Entry.Entity.GetType().Name, eve.Entry.State);
+					foreach (var ve in eve.ValidationErrors)
+					{
+						Console.WriteLine("- Property: \"{0}\", Error: \"{1}\"",
+							ve.PropertyName, ve.ErrorMessage);
+					}
+				}
+				throw;
+			}
 			catch (Exception ex)
 			{
 				Debug.WriteLine($"2. Error occurred while saving changes: {ex.Message}\n" +

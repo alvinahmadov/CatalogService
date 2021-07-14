@@ -147,8 +147,6 @@ namespace Catalog.Common.Repository
 			var productInventories = new List<ProductInventory>();
 			var cartItems = new List<ShoppingCartItem>();
 
-			MainRepository.ResetCaches(CacheType.PRODUCT, CacheType.INVENTORY, CacheType.CART_ITEM);
-
 			var responses = RestAPIManager.FetchProducts().Result;
 			int index = MainRepository.ProductsCache.Count;
 			int createCount = 0;
@@ -161,10 +159,6 @@ namespace Catalog.Common.Repository
 				{
 					var json = new ProductJSON(data);
 					var productId = json.Id;
-
-					if (productId >= 200)
-						break;
-
 					var product = json.AsEntity();
 					var stockLevel = new StockLevel(json.Stock1, json.Stock2);
 					var sub1 = json.Sub1;
@@ -238,6 +232,10 @@ namespace Catalog.Common.Repository
 				}
 			}
 
+			Console.WriteLine($"Products {products.Count}");
+			Console.WriteLine($"ProductInventories {productInventories.Count}");
+			Console.WriteLine($"CartItems {cartItems.Count}");
+
 			Repository.Context.Products.AddRange(products);
 			Repository.Context.ProductInventories.AddRange(productInventories);
 			Repository.Context.ShoppingCartItems.AddRange(cartItems);
@@ -292,10 +290,6 @@ namespace Catalog.Common.Repository
 				var json = new ProductJSON(data);
 				var photoId = product.ID;
 				var fileName = json.Image;
-
-				if (json.Id >= 200)
-					break;
-
 				var photo = new ProductPhoto(photoId, fileName) { Product = product };
 				productPhotos.Add(photo);
 

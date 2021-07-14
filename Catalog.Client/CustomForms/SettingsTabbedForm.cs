@@ -57,12 +57,12 @@ namespace Catalog.Client
 			Settings.Default.LoadImage = this.radLoadImageCheckBox.Checked;
 			Settings.Default.UpdateInterval = Convert.ToInt32(this.updateItervalSpinControl.Value);
 			Settings.Default.Commit();
-			Close();
+			Hide();
 		}
 
 		private void CancelButton_Click(Object sender, EventArgs e)
 		{
-			Close();
+			Hide();
 		}
 
 		private void LoginButton_Click(Object sender, EventArgs e)

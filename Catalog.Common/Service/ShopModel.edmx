@@ -181,8 +181,8 @@
     <Property Name="ProductID" Type="int" Nullable="false" />
     <Property Name="ProductCategoryID" Type="int" Nullable="false" />
     <Property Name="ProductSubcategoryID" Type="int" Nullable="true" />
-    <Property Name="StockLevel1" Type="nvarchar" Nullable="false" DefaultValue="&quot;-&quot;" MaxLength="5" />
-    <Property Name="StockLevel2" Type="nvarchar" Nullable="false" DefaultValue="&quot;-&quot;" MaxLength="5" />
+    <Property Name="StockLevel1" Type="nvarchar(max)" Nullable="false" DefaultValue="&quot;-&quot;" />
+    <Property Name="StockLevel2" Type="nvarchar(max)" Nullable="false" DefaultValue="&quot;-&quot;" />
     <Property Name="Pack" Type="nvarchar(max)" Nullable="false" DefaultValue="&quot;&quot;" />
     <Property Name="rowguid" Type="uniqueidentifier" Nullable="false" />
     <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
@@ -595,8 +595,8 @@
 					<Property Name="ProductID" Type="Int32" Nullable="false" />
 					<Property Name="ProductCategoryID" Type="Int32" Nullable="false" />
 					<Property Name="ProductSubcategoryID" Type="Int32" Nullable="true" />
-					<Property Name="StockLevel1" Type="String" Nullable="false" DefaultValue="&quot;-&quot;" MaxLength="5" />
-					<Property Name="StockLevel2" Type="String" Nullable="false" MaxLength="5" DefaultValue="&quot;-&quot;" />
+					<Property Name="StockLevel1" Type="String" Nullable="false" DefaultValue="&quot;-&quot;" />
+					<Property Name="StockLevel2" Type="String" Nullable="false" DefaultValue="&quot;-&quot;" />
 					<Property Name="Pack" Type="String" Nullable="false" DefaultValue="&quot;&quot;" Unicode="true" />
 					<Property Name="rowguid" Type="Guid" Nullable="false" />
 					<Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
