@@ -16,28 +16,27 @@ using Catalog.Common.Repository;
 using Catalog.Common.Service;
 using Catalog.Client.Properties;
 
+#pragma warning disable IDE0060 // Remove unused parameter
+
 namespace Catalog.Client
 {
 	public partial class BaseGridControl : UserControl
 	{
 		#region Properties
 
-		public bool IsUpdated { get; set; } = false;
-
-		public bool DataLoaded { get; protected set; } = false;
-
 		public static InventoryCollection ProductInventories { get; set; } = new InventoryCollection();
-
-		public RadVirtualGrid GridControl
-		{
-			get { return radVirtualGrid; }
-		}
 
 		public static SearchTextBox SearchTextBox { set; get; }
 
 		public static RadButton TopButton { get; set; }
 
-		public RadButton ExportButton { get => radExportButton; }
+		public Boolean IsUpdated { get; set; } = false;
+
+		public Boolean DataLoaded { get; protected set; } = false;
+
+		public RadVirtualGrid GridControl => this.radVirtualGrid;
+
+		public RadButton ExportButton => this.radExportButton;
 
 		#endregion
 
@@ -87,9 +86,7 @@ namespace Catalog.Client
 			this.radToTextBox.Leave += RadTextBox_Leave;
 		}
 
-		#pragma warning disable IDE0060 // Remove unused parameter
 		protected void ShowScreenTipForCell(VirtualGridCellElement cell, Int32 cellIndex, ProductInventory inventory)
-#pragma warning restore IDE0060 // Remove unused parameter
 		{
 			using (var defaultFont = new Font("Segoe UI", 14F))
 			{
@@ -249,8 +246,6 @@ namespace Catalog.Client
 		protected String exportFileName;
 
 		protected ISavableObject currentItem;
-
-		//protected string dataFormText;
 
 		#endregion
 	}
