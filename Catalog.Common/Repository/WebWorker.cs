@@ -238,10 +238,6 @@ namespace Catalog.Common.Repository
 				}
 			}
 
-			Debug.WriteLine($"Products.Count => {products.Count}");
-			Debug.WriteLine($"ProductInventories.Count => {productInventories.Count}");
-			Debug.WriteLine($"ShoppingCartItems.Count => {cartItems.Count}");
-
 			Repository.Context.Products.AddRange(products);
 			Repository.Context.ProductInventories.AddRange(productInventories);
 			Repository.Context.ShoppingCartItems.AddRange(cartItems);
