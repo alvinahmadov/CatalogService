@@ -380,7 +380,6 @@
     <None Include="Resources\fluent_dark.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ERP.ico" />
     <Content Include="logo14.ico" />
     <Content Include="Resources\add.png" />
     <Content Include="Resources\basket.png" />
