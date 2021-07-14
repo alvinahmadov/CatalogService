@@ -1,19 +1,12 @@
-﻿using Catalog.Common;
-using Catalog.Common.Service;
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel;
 using System.Data.Entity.Infrastructure;
-using System.Data.Services.Client;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 
 using Telerik.WinControls.Data;
 
 using ProductInventoryDataQuery = System.Data.Entity.Infrastructure.DbQuery<Catalog.Common.Service.ProductInventory>;
-using ProductInventoryExpression = System.Linq.Expressions.Expression<System.Func<Catalog.Common.Service.ProductInventory, string>>;
 
 namespace Catalog.Client
 {

@@ -1,18 +1,15 @@
-﻿using Catalog.Common;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data.Entity.Infrastructure;
 using System.Data.Services.Client;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 using Telerik.WinControls.Data;
 
 namespace Catalog.Client
 {
-    public static class FilterHelper
+	public static class FilterHelper
     {
         private static readonly MethodInfo StringStartsWithMethodInfo = typeof(string).GetMethod("StartsWith", new[] { typeof(string) });
         private static readonly MethodInfo StringEndsWithMethodInfo = typeof(string).GetMethod("EndsWith", new[] { typeof(string) });
