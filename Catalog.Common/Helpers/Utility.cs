@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Configuration;
+using System.Linq;
 using System.Globalization;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -11,6 +11,22 @@ using JsonToken = Newtonsoft.Json.Linq.JToken;
 namespace Catalog.Common
 {
 	public delegate void EventAction<TEvent>(Object sender, TEvent eventArgs);
+
+	public class GridValueChangedEventArgs : EventArgs
+	{
+		public int DataId { get; set; }
+
+		public int OldValue { get; set; }
+
+		public int NewValue { get; set; }
+
+		public GridValueChangedEventArgs(int dataId, int oldValue, int newValue)
+		{
+			this.DataId = dataId;
+			this.OldValue = oldValue;
+			this.NewValue = newValue;
+		}
+	}
 
 	public struct OrderSave
 	{
@@ -25,26 +41,6 @@ namespace Catalog.Common
 			ordernumber = orderNumber;
 			product = productId;
 			quantity = productQuantity;
-		}
-	}
-
-	public static class Configuration
-	{
-		public static string Get(string key)
-		{
-			string value = string.Empty;
-			try
-			{
-				var configurationManager = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-				var appSettings = configurationManager.AppSettings.Settings;
-				value = appSettings[key].Value;
-			}
-			catch (Exception)
-			{
-
-			}
-
-			return value;
 		}
 	}
 
@@ -300,6 +296,53 @@ namespace Catalog.Common
 				return byteArray;
 			}
 			return default;
+		}
+	}
+
+	public static class SubcategoryHelper
+	{
+		public static void Set(
+			ProductJSON json,
+			in Service.Product product,
+			out String subcategory1, 
+			out String subcategory2
+		)
+		{
+			subcategory1 = json.Sub1;
+			subcategory2 = json.Data.ContainsKey("subcategory2")
+								? json.Sub2
+								: String.Empty;
+			var subNameLower = subcategory1.ToLower();
+			var dbSubcategory = Repository.MainRepository.SubcategoriesCache
+											  .Find(c => c.Name.ToLower().Equals(subNameLower));
+
+			var productSubcategory = dbSubcategory;
+
+			if (!subcategory2.Equals(String.Empty))
+			{
+				if (dbSubcategory != null)
+				{
+					productSubcategory = Repository.MainRepository.SubcategoriesCache
+										.Where(s => s.ChildSubcategoryID == dbSubcategory.ChildSubcategoryID)
+										.FirstOrDefault();
+				}
+				else
+				{
+					var sub2Lower = subcategory2.ToLower();
+					dbSubcategory = Repository.MainRepository.SubcategoriesCache
+												  .Where(s => s.Name.ToLower().Equals(sub2Lower))
+												  .FirstOrDefault();
+				}
+
+				productSubcategory = dbSubcategory;
+			}
+			else
+				productSubcategory = dbSubcategory;
+
+			var subId = productSubcategory.SubcategoryID;
+
+			product.SubcategoryID = subId;
+			product.Subcategory = Repository.MainRepository.SubcategoriesCache.Find(c => c.SubcategoryID == subId);
 		}
 	}
 }

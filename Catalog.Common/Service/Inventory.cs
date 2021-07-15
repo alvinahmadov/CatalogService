@@ -12,20 +12,26 @@ namespace Catalog.Common.Service
     using System;
     using System.Collections.Generic;
     
-    public partial class ProductCategory
+    public partial class Inventory
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public ProductCategory()
+        public Inventory()
         {
-            this.ProductSubcategories = new HashSet<ProductSubcategory>();
+            this.StockLevel1 = "\"-\"";
+            this.StockLevel2 = "\"-\"";
+            this.Pack = "\"\"";
         }
     
-        public int ProductCategoryID { get; set; }
-        public string Name { get; set; }
+        public int ID { get; set; }
+        public int ProductID { get; set; }
+        public int CategoryID { get; set; }
+        public Nullable<int> SubcategoryID { get; set; }
+        public string StockLevel1 { get; set; }
+        public string StockLevel2 { get; set; }
+        public string Pack { get; set; }
         public System.Guid rowguid { get; set; }
         public System.DateTime ModifiedDate { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ProductSubcategory> ProductSubcategories { get; set; }
+        public virtual Product Product { get; set; }
     }
 }

@@ -12,23 +12,23 @@ namespace Catalog.Common.Service
     using System;
     using System.Collections.Generic;
     
-    public partial class ProductSubcategory
+    public partial class Subcategory
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public ProductSubcategory()
+        public Subcategory()
         {
             this.Products = new HashSet<Product>();
         }
     
-        public int ProductSubcategoryID { get; set; }
-        public int ProductCategoryID { get; set; }
+        public int SubcategoryID { get; set; }
+        public int CategoryID { get; set; }
         public Nullable<int> ChildSubcategoryID { get; set; }
         public string Name { get; set; }
         public System.Guid rowguid { get; set; }
         public System.DateTime ModifiedDate { get; set; }
     
+        public virtual Category Category { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Product> Products { get; set; }
-        public virtual ProductCategory ProductCategory { get; set; }
     }
 }

@@ -12,25 +12,23 @@ namespace Catalog.Client
 {
 	class RemoveCellElement : VirtualGridCellElement
 	{
-		public RadButtonElement removeButtonElement;
+		public event EventHandler<Common.GridValueChangedEventArgs> ValueChanged;
 
-		public event EventHandler<ValueChangedEventArgs> ValueChanged;
+		public Action<int> Callback { get; set; } = null;
 
-		public Action<int> Callback = null;
-
-		private int dataIndex;
+		public RadButtonElement RemoveButtonElement { get; private set; }
 
 		public RemoveCellElement(int dataIndex)
 		{
 			this.dataIndex = dataIndex;
-			removeButtonElement.Click += RemoveButtonElement_Click;
+			RemoveButtonElement.Click += RemoveButtonElement_Click;
 		}
 
 		private void RemoveButtonElement_Click(Object sender, EventArgs e)
 		{
 			try
 			{
-				ValueChanged?.Invoke(sender, new ValueChangedEventArgs(RowIndex, 0, 0));
+				ValueChanged?.Invoke(sender, new Common.GridValueChangedEventArgs(RowIndex, 0, 0));
 				Callback?.Invoke(RowIndex);
 			}
 			catch (Exception ex)
@@ -39,11 +37,13 @@ namespace Catalog.Client
 			}
 		}
 
+		#region VirtualGridCellElement overrides
+
 		protected override void CreateChildElements()
 		{
 			base.CreateChildElements();
 
-			this.removeButtonElement = new RadButtonElement
+			this.RemoveButtonElement = new RadButtonElement
 			{
 				DisplayStyle = DisplayStyle.Image,
 				Margin = new Padding(0),
@@ -62,9 +62,9 @@ namespace Catalog.Client
 				Shape = new CircleShape(),
 				Image = Resources.delete
 			};
-			this.removeButtonElement.MaxSize = new Size(40, 40);
-			this.removeButtonElement.ImagePrimitive.ImageLayout = ImageLayout.Center;
-			this.Children.Add(this.removeButtonElement);
+			this.RemoveButtonElement.MaxSize = new Size(40, 40);
+			this.RemoveButtonElement.ImagePrimitive.ImageLayout = ImageLayout.Center;
+			this.Children.Add(this.RemoveButtonElement);
 		}
 
 		public override bool IsCompatible(int data, object context)
@@ -79,18 +79,16 @@ namespace Catalog.Client
 			return base.ArrangeOverride(size);
 		}
 
-		protected override Type ThemeEffectiveType
-		{
-			get
-			{
-				return typeof(VirtualGridCellElement);
-			}
-		}
+		protected override Type ThemeEffectiveType => typeof(VirtualGridCellElement);
 
 		protected override void DisposeManagedResources()
 		{
-			removeButtonElement.Dispose();
+			RemoveButtonElement.Dispose();
 			base.DisposeManagedResources();
 		}
+
+		#endregion
+
+		private int dataIndex;
 	}
 }

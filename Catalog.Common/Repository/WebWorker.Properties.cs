@@ -4,6 +4,8 @@
 	{
 		public static System.Action<System.String, System.Object> LoggingCallback { get; set; }
 
+		public static System.Action SuccessCallback { get; set; }
+
 		public static System.Boolean HasConnection
 		{
 			get => RestAPIManager.HasConnection;

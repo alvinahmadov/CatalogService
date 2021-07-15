@@ -23,7 +23,7 @@ namespace Catalog.Common.Service
     
         public int ID { get; set; }
         public int ProductID { get; set; }
-        public Nullable<int> ProductSubcategoryID { get; set; }
+        public Nullable<int> SubcategoryID { get; set; }
         public string ArticleNumber { get; set; }
         public string Code { get; set; }
         public string Brand { get; set; }
@@ -33,11 +33,11 @@ namespace Catalog.Common.Service
         public System.Guid rowguid { get; set; }
         public System.DateTime ModifiedDate { get; set; }
     
-        public virtual ProductSubcategory ProductSubcategory { get; set; }
+        public virtual Subcategory Subcategory { get; set; }
+        public virtual Photo Photo { get; set; }
+        public virtual Inventory Inventories { get; set; }
+        public virtual ShoppingCartItem ShoppingCartItem { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<SpecialOfferProduct> SpecialOfferProducts { get; set; }
-        public virtual ProductPhoto ProductPhoto { get; set; }
-        public virtual ProductInventory ProductInventories { get; set; }
-        public virtual ShoppingCartItem ShoppingCartItem { get; set; }
     }
 }

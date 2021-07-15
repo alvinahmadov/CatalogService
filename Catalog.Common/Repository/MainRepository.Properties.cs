@@ -22,11 +22,11 @@ namespace Catalog.Common.Repository
 		#region Fields
 
 		private static List<Product> productsCache = null;
-		private static List<ProductCategory> productCategoriesCache = null;
-		private static List<ProductSubcategory> productSubcategoriesCache = null;
-		private static List<ProductInventory> productInventoryCache = null;
-		private static List<ProductPhoto> productPhotoCache = null;
+		private static List<Category> categoriesCache = null;
+		private static List<Subcategory> subcategoriesCache = null;
+		private static List<Inventory> inventoryCache = null;
 		private static List<ShoppingCartItem> shoppingCartItemCache = null;
+		private static List<Photo> photoCache = null;
 
 		#endregion
 
@@ -44,26 +44,25 @@ namespace Catalog.Common.Repository
 					productsCache = null;
 					break;
 				case CacheType.INVENTORY:
-					productInventoryCache = null;
+					inventoryCache = null;
 					break;
 				case CacheType.CATEGORY:
-					productCategoriesCache = null;
+					categoriesCache = null;
 					break;
 				case CacheType.SUBCATEGORY:
-					productSubcategoriesCache = null;
+					subcategoriesCache = null;
 					break;
 				case CacheType.PHOTO:
-					productPhotoCache = null;
+					photoCache = null;
 					break;
 				case CacheType.CART_ITEM:
 					shoppingCartItemCache = null;
 					break;
 				default:
 					productsCache = null;
-					productCategoriesCache = null;
-					productSubcategoriesCache = null;
-					productInventoryCache = null;
-					productPhotoCache = null;
+					categoriesCache = null;
+					subcategoriesCache = null;
+					inventoryCache = null;
 					break;
 			}
 		}
@@ -77,7 +76,7 @@ namespace Catalog.Common.Repository
 				if (productsCache == null)
 				{
 					productsCache = Context.Products
-											.Include(p => p.ProductSubcategory)
+											.Include(p => p.Subcategory)
 											.ToList();
 				}
 
@@ -90,73 +89,83 @@ namespace Catalog.Common.Repository
 			}
 		}
 
-		public static List<ProductInventory> ProductInventoriesCache
+		public static List<Inventory> InventoriesCache
 		{
 			get
 			{
-				if (productInventoryCache == null)
-					productInventoryCache = Context.ProductInventories
-															.Include(p => p.Product)
-															.ToList();
+				if (inventoryCache == null)
+					inventoryCache = Context.Inventories
+													.Include(p => p.Product)
+													.ToList();
 
-				return productInventoryCache;
+				return inventoryCache;
 			}
 			set
 			{
-				if (productInventoryCache != value)
+				if (inventoryCache != value)
 				{
-					productInventoryCache = value;
+					inventoryCache = value;
 				}
 			}
 		}
 
-		public static List<ProductCategory> ProductCategoriesCache
+		public static List<Category> CategoriesCache
 		{
 			get
 			{
-				if (productCategoriesCache == null)
-					productCategoriesCache = Context.ProductCategories
-													.Include(q => q.ProductSubcategories)
+				if (categoriesCache == null)
+					categoriesCache = Context.Categories
+													.Include(q => q.Subcategories)
 													.ToList();
 
-				return productCategoriesCache;
+				return categoriesCache;
 			}
 			set
 			{
-				if (productCategoriesCache != value)
-					productCategoriesCache = value;
+				if (categoriesCache != value)
+					categoriesCache = value;
 			}
 		}
 
-		public static List<ProductSubcategory> ProductSubcategoriesCache
+		public static List<Subcategory> SubcategoriesCache
 		{
 			get
 			{
-				if (productSubcategoriesCache == null)
-					productSubcategoriesCache = Context.ProductSubcategories.ToList();
-				return productSubcategoriesCache;
+				if (subcategoriesCache == null)
+					subcategoriesCache = Context.Subcategories.ToList();
+				return subcategoriesCache;
 			}
 			set
 			{
-				//if (productSubcategoriesCache != value)
-					productSubcategoriesCache = value;
+				if (subcategoriesCache != value)
+					subcategoriesCache = value;
 			}
 
 		}
 
-		public static List<ProductPhoto> ProductPhotoCache
+		public static List<Photo> PhotoCache
 		{
 			get
 			{
-				if (productPhotoCache == null)
-					productPhotoCache = Context.ProductPhotos.ToList();
+				if (photoCache == null)
+					photoCache = Context.Photos.ToList();
 
-				return productPhotoCache;
+				return photoCache;
 			}
 			set
 			{
-				if (productPhotoCache != value)
-					productPhotoCache = value;
+				if (photoCache != value)
+					photoCache = value;
+			}
+		}
+
+		public static List<Photo> Photos
+		{
+			get => photoCache;
+			set
+			{
+				if (photoCache != value)
+					photoCache = value;
 			}
 		}
 

@@ -1,19 +1,19 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Catalog.Client
 {
 	public class ControlContainer
 	{
-		public int Id { get; private set; }
+		public Int32 Id { get; private set; }
 
-		public bool IsTopControl { get; set; }
+		public Boolean IsTopControl { get; set; }
 
-		public bool IsCurrentControl { get; set; }
+		public Boolean IsCurrentControl { get; set; }
 
 		public BaseGridControl Control { get; private set; }
 
-		public ControlContainer(int id, BaseGridControl control)
+		public ControlContainer(Int32 id, BaseGridControl control)
 		{
 			Id = id;
 			Control = control;
@@ -21,7 +21,7 @@ namespace Catalog.Client
 			IsCurrentControl = false;
 		}
 
-		public ControlContainer(int id, BaseGridControl control, bool isTop, bool isCurrent)
+		public ControlContainer(Int32 id, BaseGridControl control, Boolean isTop, Boolean isCurrent)
 		{
 			Id = id;
 			Control = control;
@@ -34,15 +34,15 @@ namespace Catalog.Client
 	{
 		public List<ChildControlContainer> Children { get; private set; }
 
-		public ParentControlContainer(int id, BaseGridControl control)
+		public ParentControlContainer(Int32 id, BaseGridControl control)
 			: base(id, control, true, false)
 		{
 			Children = new List<ChildControlContainer>();
 		}
 
-		public bool Add(int childId, BaseGridControl childControl)
+		public Boolean Add(Int32 childId, BaseGridControl childControl)
 		{
-			bool hasChild = this[childId] != null;
+			Boolean hasChild = this[childId] != null;
 			if (!hasChild)
 				Children.Add(new ChildControlContainer(childId, this.Id, childControl));
 
@@ -70,9 +70,9 @@ namespace Catalog.Client
 
 	public class ChildControlContainer : ControlContainer
 	{
-		public int ParentId { get; set; }
+		public Int32 ParentId { get; set; }
 
-		public ChildControlContainer(int id, int parentId, BaseGridControl control)
+		public ChildControlContainer(Int32 id, Int32 parentId, BaseGridControl control)
 			: base(id, control, false, false)
 		{
 			ParentId = parentId;
@@ -126,13 +126,13 @@ namespace Catalog.Client
 			get => this.Controls[parentId];
 		}
 
-		public ControlContainer Get(int parentId, int childId)
+		public ControlContainer Get(Int32 parentId, Int32 childId)
 		{
 			var ctrl = Controls.Find(c => c.Id == parentId) as ParentControlContainer;
 			return ctrl[childId];
 		}
 
-		public ControlContainer Find(int parentId, int childId)
+		public ControlContainer Find(Int32 parentId, Int32 childId)
 		{
 			var parentCtrl = Controls.Find(c => c.Id == parentId) as ParentControlContainer;
 			ChildControlContainer childCtrl = null;

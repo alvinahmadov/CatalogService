@@ -16,7 +16,7 @@
 
 	public enum ShoppingCartStatus
 	{
-		PENDING = 0,
-		FINISHED = 1
+		Pending = 0,
+		Ordered = 1
 	}
 }

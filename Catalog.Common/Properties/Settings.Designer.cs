@@ -9,6 +9,8 @@
 //------------------------------------------------------------------------------
 
 namespace Catalog.Common.Properties {
+    
+    
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
@@ -57,6 +59,15 @@ namespace Catalog.Common.Properties {
         public string ToEmail {
             get {
                 return ((string)(this["ToEmail"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://ivanshop.ru/optzakaz/")]
+        public string imageURL {
+            get {
+                return ((string)(this["imageURL"]));
             }
         }
     }

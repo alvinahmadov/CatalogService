@@ -13,12 +13,12 @@ namespace Catalog.Common.Service
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class ShopEntities : DbContext
+    public partial class CatalogContext : DbContext
     {
-        public ShopEntities()
-            : base("name=ShopEntities")
+        public CatalogContext()
+            : base("name=CatalogContext")
         {
-    	    Database.SetInitializer(new CreateDatabaseIfNotExists<ShopEntities>());
+    	    Database.SetInitializer(new CreateDatabaseIfNotExists<CatalogContext>());
         }
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -28,15 +28,15 @@ namespace Catalog.Common.Service
     
         public virtual DbSet<Location> Locations { get; set; }
         public virtual DbSet<Product> Products { get; set; }
-        public virtual DbSet<ProductCategory> ProductCategories { get; set; }
-        public virtual DbSet<ProductPhoto> ProductPhotos { get; set; }
-        public virtual DbSet<ProductSubcategory> ProductSubcategories { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Photo> Photos { get; set; }
+        public virtual DbSet<Subcategory> Subcategories { get; set; }
         public virtual DbSet<TransactionHistory> TransactionHistories { get; set; }
         public virtual DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }
         public virtual DbSet<SpecialOffer> SpecialOffers { get; set; }
         public virtual DbSet<SpecialOfferProduct> SpecialOfferProducts { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<ProductInventory> ProductInventories { get; set; }
+        public virtual DbSet<Inventory> Inventories { get; set; }
         public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
         public virtual DbSet<Settings> Settings { get; set; }
     }

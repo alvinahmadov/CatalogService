@@ -21,13 +21,18 @@ namespace Catalog.Client
 			get => this.radSearchTextBox;
 		}
 
-		public TopControl()
+		public RadLabel UpdateStatus { get; set; }
+
+		public TopControl(Control parent)
 		{
+			this.Parent = parent;
 			this.Visible = false;
 			InitializeComponent();
+
 			this.radLayoutControl.Visible = false;
 
 			this.radSettingsDialog = new SettingsTabbedForm();
+			this.radSettingsDialog.UpdateStatusLabel = UpdateStatus;
 			this.radSettingsButton.Click += RadSettingsButton_Click;
 
 			this.radSearchTextBox.Size = new Size(200, 100);
@@ -55,35 +60,16 @@ namespace Catalog.Client
 
 		#region Private members
 
-		[SuppressMessage("Style", "IDE0044")]
-		private RadPictureBox radLogoBox;
-		
-		[SuppressMessage("Style", "IDE0044")]
 		private RadButton radOrdersButton;
-		
-		[SuppressMessage("Style", "IDE0044")]
 		private RadButton radSettingsButton;
-		
-		[SuppressMessage("Style", "IDE0044")]
+		private RadPictureBox radLogoBox;
 		private SearchTextBox radSearchTextBox;
-		
-		[SuppressMessage("Style", "IDE0044")]
 		private RadLayoutControl radLayoutControl;
-
-		[SuppressMessage("Style", "IDE0044")]
 		private LayoutControlItem radLogoBoxControlItem;
-		
-		[SuppressMessage("Style", "IDE0044")]
 		private LayoutControlItem radSettingsButtonControlItem;
-
-		[SuppressMessage("Style", "IDE0044")]
 		private LayoutControlItem radSearchTextBoxControlItem;
-		
-		[SuppressMessage("Style", "IDE0044")]
 		private LayoutControlItem radOrdersButtonControlItem;
-
-		[SuppressMessage("Style", "IDE0044")]
-		private SettingsTabbedForm radSettingsDialog;
+		private readonly SettingsTabbedForm radSettingsDialog;
 
 		#endregion
 	}

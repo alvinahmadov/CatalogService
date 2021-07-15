@@ -16,11 +16,18 @@ namespace Catalog.Client
 {
 	public partial class MainForm : RadForm
 	{
-		static readonly int CollapsiblePanelMaxWidth = 300;
+		public static Int16 CollapsiblePanelMaxWidth
+		{
+			get => collapsiblePanelMaxWidth;
 
-		static readonly int CollapsiblePanelMinWidth = 35;
+			set
+			{
+				if (value >= GUI.COLLAPSIBLE_PANEL_MIN_WIDTH && value <= GUI.COLLAPSIBLE_PANEL_MAX_WIDTH)
+					collapsiblePanelMaxWidth = value;
+			}
+		}
 
-		static Common.UpdateTimer UpdateTimer;
+		public static Int16 CollapsiblePanelMinWidth => collapsiblePanelMinWidth;
 
 		public MainForm()
 		{
@@ -39,6 +46,8 @@ namespace Catalog.Client
 			this.radCollapsiblePanel.Collapsed += CollapsiblePanel_Collapsed;
 			this.radCollapsiblePanel.Expanded += CollapsiblePanel_Expanded;
 			this.topControl.OrdersButton.Click += OrdersButton_Click;
+
+			this.topControl.UpdateStatus = statusControl.UpdateStatus;
 
 			InitializeControls();
 		}
@@ -61,56 +70,15 @@ namespace Catalog.Client
 			BaseGridControl.TopButton = this.topControl.OrdersButton;
 			BaseGridControl.SearchTextBox = this.topControl.SearchTextBox;
 
-			void updateCallback()
-			{
-				Debug.WriteLine("Update testing");
-				WebWorker.LoggingCallback = UpdateStatus;
-				if (!WebWorker.HasConnection)
-				{
-					UpdateStatus("Отсутствует подключение к сети!");
-					Thread.Sleep(1500);
-					return;
-				}
-
-				if (WebWorker.UpdateStatus == Common.UpdateStatus.Started)
-					return;
-
-				try
-				{
-					
-					WebWorker.UpdateStatus = Common.UpdateStatus.Started;
-					WebWorker.InitProductCategories();
-					WebWorker.InitProductSubcategories();
-					var productCount = WebWorker.InitProducts();
-
-					if (Settings.Default.LoadImage && WebWorker.HasConnection
-						&& !WebWorker.PhotosUpdating)
-					{
-						UpdateStatus("Обновление картинок...");
-						Task.Run(WebWorker.InitProductPhotos);
-					}
-
-					MainRepository.ResetCache(CacheType.INVENTORY);
-					UpdateStatus($"<html>Обновлено <b>{productCount}</b> товаров");
-					WebWorker.UpdateStatus = Common.UpdateStatus.Finished;
-				}
-				catch (Exception ex)
-				{
-					UpdateStatus($"<html><span style=\"color:red;\">Произошла ошибка: {ex.Message}</span>");
-					MessageBox.Show($"{ex.Message}\n{ex.StackTrace}", "Connection Error");
-				}
-			}
-
-			var interval = Settings.Default.UpdateInterval;
-
-			UpdateTimer = new Common.UpdateTimer(interval, updateCallback);
+			InitializeTimer();
 
 			var builder = new NodeBuilder(radTreeView, FontStyle.Bold);
 			var absTag = ProductTag.Absolute;
 			placeholderCtrl = new InventoriesControl(absTag);
 			this.tableLayoutPanelBottom.Controls.Add(placeholderCtrl, 1, 1);
 
-			var treeNodes = builder.InitializeNodes(false, "Все", tag =>
+			var treeNodes = builder.InitializeNodes(false, "Все",
+			tag =>
 			{
 				var ctrl = new InventoriesControl(tag);
 				controlCollection.AddControl(ctrl, tag);
@@ -118,9 +86,9 @@ namespace Catalog.Client
 
 			try
 			{
-				if (InventoryCollection.StatusButton == null)
+				if (GridItemCollection.StatusButton == null)
 				{
-					InventoryCollection.StatusButton = this.topControl.OrdersButton;
+					GridItemCollection.StatusButton = this.topControl.OrdersButton;
 					try
 					{
 						var cart = MainRepository.GetShoppingCarts().SingleOrDefault();
@@ -150,21 +118,59 @@ namespace Catalog.Client
 			UpdateTimer.Start();
 		}
 
-		void UpdateStatus(string statusText, Object obj = null)
+		protected void InitializeTimer()
+		{
+			UpdateTimer.Callback = () =>
+			{
+				WebWorker.LoggingCallback = UpdateStatus;
+
+				if (!WebWorker.HasConnection)
+				{
+					UpdateStatus(MESSAGE.Web.NO_CONNECTION);
+					Thread.Sleep(1500);
+					return;
+				}
+
+				try
+				{
+					WebWorker.LoadData();
+					this.statusControl.UpdateStatus.Text = string.Format(MESSAGE.Gui.UPDATE_STATUS, DateTime.Now);
+				}
+				catch (Exception ex)
+				{
+					UpdateStatus($"<html><span style=\"color:red;\">Произошла ошибка: {ex.Message}</span>");
+					MessageBox.Show($"{ex.Message}\n{ex.StackTrace}", "Connection Error");
+				}
+			};
+
+			var interval = Settings.Default.UpdateInterval;
+			UpdateTimer.DueTime = interval;
+			UpdateTimer.Period = interval;
+		}
+
+		void UpdateStatus(String statusText, Object obj = null)
 		{
 			Invoke(new Action(() => StatusLabelElement.Text = statusText));
 		}
 
 		#region Event handling
 
-		private void CollapsiblePanel_Expanded(object sender, EventArgs e)
+		private void CollapsiblePanel_Expanded(Object sender, EventArgs e)
 		{
 			tableLayoutPanelBottom.ColumnStyles[0].Width = CollapsiblePanelMaxWidth;
 		}
 
-		private void CollapsiblePanel_Collapsed(object sender, EventArgs e)
+		private void CollapsiblePanel_Collapsed(Object sender, EventArgs e)
 		{
 			tableLayoutPanelBottom.ColumnStyles[0].Width = CollapsiblePanelMinWidth;
+		}
+
+		public void UpdateCollabsiblePanel()
+		{
+			if (this.radCollapsiblePanel.IsExpanded)
+				this.radCollapsiblePanel.ToggleExpandCollapse();
+
+			this.radCollapsiblePanel.Expand();
 		}
 
 		protected virtual void OrdersButton_Click(Object sender, EventArgs e)
@@ -172,8 +178,7 @@ namespace Catalog.Client
 			var ctrl = controlCollection.ActiveControl.Control as InventoriesControl;
 			var dialog = new DetailsForm { Text = "Корзина" };
 
-			dialog.FormClosed +=
-			(s, fcea) =>
+			dialog.FormClosed += (s, fcea) =>
 			{
 				controlCollection
 							 .Controls
@@ -195,17 +200,14 @@ namespace Catalog.Client
 				}
 				else if (tag.SID == -1)
 				{
-
-					var subcaches = MainRepository.ProductSubcategoriesCache
-												  .Where(sc => sc.ProductCategoryID == tag.CID);
-
+					var subcaches = MainRepository.SubcategoriesCache
+												  .Where(sc => sc.CategoryID == tag.CID);
 					foreach (var subcat in subcaches)
 						tag.Count += subcat.Products.Count;
 				}
 				else
 				{
-					tag.Count = MainRepository.ProductInventoriesCache
-											  .Count(p => p.ProductSubcategoryID == tag.SID);
+					tag.Count = MainRepository.InventoriesCache.Count(p => p.SubcategoryID == tag.SID);
 				}
 			}
 			AttachGridControl(tag);
@@ -223,13 +225,10 @@ namespace Catalog.Client
 				ControlContainer currentHldr = null;
 
 				if (tag.IsZero || tag.SID == -1) // Common
-				{
 					currentHldr = controlCollection[tag.CID] as ParentControlContainer;
-				}
 				else // Only by subcategory
-				{
 					currentHldr = controlCollection.Get(tag.CID, tag.SID) as ChildControlContainer;
-				}
+
 
 				currentHldr.IsCurrentControl = true;
 				controlCollection.ActiveControl = currentHldr;
@@ -249,6 +248,7 @@ namespace Catalog.Client
 						tableLayoutPanelBottom.Controls.Remove(oldCtrl);
 					}
 				}
+
 				tableLayoutPanelBottom.Controls.Add(newCtrl, 1, 1);
 				radTreeView.SelectedNode.Value = tag.ToString();
 				newCtrl.ResetFilter(true);
@@ -262,9 +262,16 @@ namespace Catalog.Client
 		#endregion
 
 		#region Fields
+
+
+		public static Int16 collapsiblePanelMaxWidth = Settings.Default.LeftPanelWidth;
+
+		public static readonly Int16 collapsiblePanelMinWidth = GUI.DEFAULT_COLLAPSIBLE_PANEL_MIN_WIDTH;
+		
 		readonly GridControlCollection controlCollection;
 		private BaseGridControl placeholderCtrl;
 
+		public static RadLabelElement StatusLabelElement;
 		private TopControl topControl;
 		private StatusControl statusControl;
 		private TableLayoutPanel tableLayoutPanelTop;
@@ -274,7 +281,6 @@ namespace Catalog.Client
 		private RadTreeView radTreeView;
 		private RadBreadCrumb radBreadCrumb;
 		private TabEdgeShape tabEdgeShape;
-		public static RadLabelElement StatusLabelElement;
 
 		#endregion
 	}

@@ -1,79 +1,104 @@
-﻿using System;
+﻿#pragma warning disable IDE0039 // Use local function
+using System;
 using System.IO;
 using System.Linq;
 using System.Drawing;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Diagnostics;
 
 using Catalog.Common.Service;
+
+using DatabaseSettings = Catalog.Common.Service.Settings;
+using Categories = System.Collections.Generic.List<Catalog.Common.Service.Category>;
+using Subcategories = System.Collections.Generic.List<Catalog.Common.Service.Subcategory>;
+using Products = System.Collections.Generic.List<Catalog.Common.Service.Product>;
+using Inventories = System.Collections.Generic.List<Catalog.Common.Service.Inventory>;
+using ShoppingCartItems = System.Collections.Generic.List<Catalog.Common.Service.ShoppingCartItem>;
+using Photos = System.Collections.Generic.List<Catalog.Common.Service.Photo>;
 
 namespace Catalog.Common.Repository
 {
 	public partial class WebWorker
 	{
-		public static void InitSettings()
+		public static void LoadData()
 		{
-			var dbSettings = Repository.Context.Settings.SingleOrDefault();
-			if (dbSettings == null)
-			{
-				dbSettings = new Settings(1);
-				dbSettings.Save(true, true);
-			}
+			if (UpdateStatus == UpdateStatus.Started)
+				return;
+
+			UpdateStatus = UpdateStatus.Started;
+
+			var settings = InitSettings();
+			LoadCategories();
+			LoadSubcategories();
+			LoadProducts();
+			if (settings.LoadImage && !PhotosUpdating)
+				System.Threading.Tasks.Task.Run(LoadPhotos);
+
+
+			MainRepository.ResetCache();
+			UpdateStatus = UpdateStatus.Finished;
+			OnSuccess();
 		}
 
-		public static int InitProductCategories()
+		private static DatabaseSettings InitSettings()
+		{
+			var dbSettings = Repository.Context.Settings.SingleOrDefault();
+
+			if (dbSettings == null)
+			{
+				dbSettings = new DatabaseSettings(1);
+				dbSettings.Save(true);
+			}
+
+			return dbSettings;
+		}
+
+		private static void LoadCategories()
 		{
 			UpdateStatus = UpdateStatus.Started;
 			int count = 0;
-			var productCategories = new List<ProductCategory>();
+			var categories = new Categories();
 			var response = RestAPIManager.FetchProductCategories().Result;
 
 			if (response is null)
-				return count;
+				return;
 
 			foreach (var data in response)
 			{
 				var category = new CategoryJSON(data).AsEntity();
 				var dbCategory = Repository
 								 .Context
-								 .ProductCategories
+								 .Categories
 								 .Where(c => c.Name.Equals(category.Name))
 								 .SingleOrDefault();
 
 				if (dbCategory == null)
 				{
 					Log(MESSAGE.Category.ADD_STATUS, category.Name);
-					productCategories.Add(category);
+					categories.Add(category);
 					count++;
 				}
 			}
 
-			InitShoppingCart();
-
-			Repository.Context.ProductCategories.AddRange(productCategories);
-			EntityModel.Commit();
-
+			LoadShoppingCart();
+			Category.SaveRange(categories);
 			MainRepository.ResetCache(CacheType.CATEGORY);
+			UpdateStatus = UpdateStatus.Finished;
 
 			if (count == 0)
-				count = MainRepository.ProductCategoriesCache.Count;
+				count = MainRepository.CategoriesCache.Count;
 
 			Log(MESSAGE.Category.LOADED_STATUS, ContentAlignment.MiddleCenter, count);
-
-			UpdateStatus = UpdateStatus.Finished;
-			return count;
 		}
 
-		public static int InitProductSubcategories()
+		private static void LoadSubcategories()
 		{
 			int count = 0;
 			UpdateStatus = UpdateStatus.Started;
 
-			var productSubcategories = new List<ProductSubcategory>();
+			var subcategories = new Subcategories();
 			MainRepository.ResetCache(CacheType.SUBCATEGORY);
 
-			foreach (var category in MainRepository.ProductCategoriesCache)
+			foreach (var category in MainRepository.CategoriesCache)
 			{
 				var response = RestAPIManager.FetchSubcategories(category.Name).Result;
 
@@ -82,8 +107,8 @@ namespace Catalog.Common.Repository
 
 				foreach (var data in response)
 				{
-					ProductSubcategory baseSubcategory = null;
-					ProductSubcategory childSubcategory = null;
+					Subcategory baseSubcategory = null;
+					Subcategory childSubcategory = null;
 
 					for (int index = 1; index <= 2; ++index)
 					{
@@ -93,15 +118,15 @@ namespace Catalog.Common.Repository
 							continue;
 
 						var subcategoryName = data[key].ToObject<String>();
-						var exists = MainRepository.ProductSubcategoriesCache
+						var exists = MainRepository.SubcategoriesCache
 												   .Exists(s => Base64.Encode(s.Name) == Base64.Encode(subcategoryName));
 
 						if (!exists)
 						{
-							var subcategory = new ProductSubcategory(category.ProductCategoryID, subcategoryName);
-							Log(MESSAGE.Subcategory.ADD_STATUS, subcategory.Name);
-							productSubcategories.Add(subcategory);
+							var subcategory = new Subcategory(category.CategoryID, subcategoryName);
+							subcategories.Add(subcategory);
 							count++;
+							Log(MESSAGE.Subcategory.ADD_STATUS, subcategory.Name);
 
 							if (index == 1)
 							{
@@ -116,36 +141,29 @@ namespace Catalog.Common.Repository
 
 					if (childSubcategory != null)
 					{
-						baseSubcategory.ChildSubcategoryID = childSubcategory.ProductSubcategoryID;
+						baseSubcategory.ChildSubcategoryID = childSubcategory.SubcategoryID;
 					}
 
 				}
 			}
-
-			Repository.Context.ProductSubcategories.AddRange(productSubcategories);
-			EntityModel.Commit();
+			Subcategory.SaveRange(subcategories);
 			MainRepository.ResetCache(CacheType.SUBCATEGORY);
-
-			if (count == 0)
-				count = MainRepository.ProductSubcategoriesCache.Count;
-
-			Log(MESSAGE.Subcategory.LOADED_STATUS, ContentAlignment.MiddleCenter, count);
 			UpdateStatus = UpdateStatus.Finished;
 
-			return count;
+			if (count == 0)
+				count = MainRepository.SubcategoriesCache.Count;
+
+			Log(MESSAGE.Subcategory.LOADED_STATUS, ContentAlignment.MiddleCenter, count);
 		}
 
-		public static int InitProducts()
+		private static void LoadProducts()
 		{
-			if (!HasConnection)
-				return -1;
-
 			UpdateStatus = UpdateStatus.Started;
-			var cart = InitShoppingCart();
+			var cart = LoadShoppingCart();
 
-			var products = new List<Product>();
-			var productInventories = new List<ProductInventory>();
-			var cartItems = new List<ShoppingCartItem>();
+			var products = new Products();
+			var inventories = new Inventories();
+			var cartItems = new ShoppingCartItems();
 
 			var responses = RestAPIManager.FetchProducts().Result;
 			int index = MainRepository.ProductsCache.Count;
@@ -155,46 +173,17 @@ namespace Catalog.Common.Repository
 
 			foreach (var response in responses)
 			{
+				if (response is null)
+					continue;
+
 				foreach (var data in response)
 				{
 					var json = new ProductJSON(data);
 					var productId = json.Id;
 					var product = json.AsEntity();
 					var stockLevel = new StockLevel(json.Stock1, json.Stock2);
-					var sub1 = json.Sub1;
-					var sub2 = data.ContainsKey("subcategory2")
-										? json.Sub2
-										: String.Empty;
 
-					var dbSubcategory = MainRepository.ProductSubcategoriesCache
-													  .Find(c => c.Name.ToLower().Equals(sub1.ToLower()));
-
-					var productSubcategory = dbSubcategory;
-
-					if (!sub2.Equals(String.Empty))
-					{
-						if (dbSubcategory != null)
-						{
-							productSubcategory = MainRepository.ProductSubcategoriesCache
-												.Where(s => s.ChildSubcategoryID == dbSubcategory.ChildSubcategoryID)
-												.FirstOrDefault();
-						}
-						else
-						{
-							var sub2Lower = sub2.ToLower();
-							dbSubcategory = MainRepository.ProductSubcategoriesCache
-														  .Where(s => s.Name.ToLower().Equals(sub2Lower))
-														  .FirstOrDefault();
-						}
-
-						productSubcategory = dbSubcategory;
-					}
-					else
-						productSubcategory = dbSubcategory;
-
-					product.ProductSubcategoryID = productSubcategory.ProductSubcategoryID;
-					product.ProductSubcategory = MainRepository.ProductSubcategoriesCache
-															   .Find(c => c.ProductSubcategoryID == product.ProductSubcategoryID);
+					SubcategoryHelper.Set(json, in product, out String sub1, out String sub2);
 
 					var dbItem = Repository.Context
 										   .Products
@@ -203,23 +192,23 @@ namespace Catalog.Common.Repository
 					if (dbItem == null)
 					{
 						product.ID = ++index;
-						var productInventory = new ProductInventory(product, stockLevel, json.Package);
+						var inventory = new Inventory(product, stockLevel, json.Package);
 						var cartItem = new ShoppingCartItem(cart, product);
 
 						products.Add(product);
-						productInventories.Add(productInventory);
+						inventories.Add(inventory);
 						cartItems.Add(cartItem);
 
 						createCount++;
-
 						Log(MESSAGE.Product.ADD_STATUS, product.Name);
 					}
 					else
 					{
 						if (dbItem.Update(product))
 						{
-							UpdateProductInventory(product, stockLevel, json.Package);
+							UpdateInventory(product, stockLevel, json.Package);
 							UpdateShoppingCartItem(product, cart);
+
 							updateCount++;
 							Log(MESSAGE.Product.UPD_STATUS, product.Name);
 						}
@@ -232,14 +221,9 @@ namespace Catalog.Common.Repository
 				}
 			}
 
-			Console.WriteLine($"Products {products.Count}");
-			Console.WriteLine($"ProductInventories {productInventories.Count}");
-			Console.WriteLine($"CartItems {cartItems.Count}");
-
-			Repository.Context.Products.AddRange(products);
-			Repository.Context.ProductInventories.AddRange(productInventories);
-			Repository.Context.ShoppingCartItems.AddRange(cartItems);
-			EntityModel.Commit();
+			Product.SaveRange(products);
+			Inventory.SaveRange(inventories);
+			ShoppingCartItem.SaveRange(cartItems);
 
 			MainRepository.ResetCaches(CacheType.PRODUCT, CacheType.INVENTORY, CacheType.CART_ITEM);
 
@@ -267,18 +251,17 @@ namespace Catalog.Common.Repository
 				count = MainRepository.ProductsCache.Count;
 				Log(MESSAGE.Product.MIXED_STATUS, ContentAlignment.MiddleCenter, count);
 			}
-
-			return count;
 		}
 
-		public static void InitProductPhotos()
+		private static void LoadPhotos()
 		{
 			if (!HasConnection)
 				return;
-
-			UpdateStatus = UpdateStatus.Started;
 			int imageCount = 0;
-			var productPhotos = new List<ProductPhoto>();
+
+			MainRepository.ResetCache(CacheType.PHOTO);
+			MainRepository.Photos = new Photos();
+			UpdateStatus = UpdateStatus.Started;
 
 			foreach (var product in MainRepository.ProductsCache)
 			{
@@ -287,34 +270,29 @@ namespace Catalog.Common.Repository
 					continue;
 
 				var data = response[0];
-				var json = new ProductJSON(data);
 				var photoId = product.ID;
-				var fileName = json.Image;
-				var photo = new ProductPhoto(photoId, fileName) { Product = product };
-				productPhotos.Add(photo);
+				var fileName = new ProductJSON(data).Image;
+				var photo = new Photo(photoId, fileName) { Product = product };
+				MainRepository.Photos.Add(photo);
 
 				if (fileName.Length == 0)
 					continue;
-
 				PhotosUpdating = true;
-				InitProductPhoto(ref photo);
+				LoadPhoto(photoId, fileName);
 
 				imageCount++;
 			}
 
-			Repository.Context.ProductPhotos.AddRange(productPhotos);
-			EntityModel.Commit();
-
+			Photo.SaveRange(MainRepository.Photos);
 			MainRepository.ResetCache(CacheType.PHOTO);
+
+			OnSuccess();
 			UpdateStatus = UpdateStatus.Finished;
 		}
 
-		private static void InitProductPhoto(ref ProductPhoto productPhoto)
+		private static void LoadPhoto(Int32 photoId, String filename)
 		{
-			var photo = productPhoto;
-			var filename = productPhoto.FileName;
-
-			Action<Byte[]> callback = bytes =>
+			Action<Byte[]> downloadCallback = bytes =>
 			{
 				using (var memstream = new MemoryStream(bytes))
 				{
@@ -324,10 +302,12 @@ namespace Catalog.Common.Repository
 					var thumbNailPhotoBytes = ImageUtil.GetThumbnailPhotoBytes(ref thumbnailPhoto);
 					var largePhotoBytes = ImageUtil.GetLargePhotoBytes(ref largePhoto);
 
+					var photo = MainRepository.Photos.Find(p => p.ID == photoId);
+
 					photo.ThumbNailPhoto = thumbNailPhotoBytes;
 					photo.LargePhoto = largePhotoBytes;
 
-					var dbPhoto = Repository.Context.ProductPhotos.Find(photo.ID);
+					var dbPhoto = Repository.Context.Photos.Find(photo.ID);
 
 					if (dbPhoto == null)
 						Log(MESSAGE.Photo.ADD_STATUS, photo);
@@ -337,18 +317,35 @@ namespace Catalog.Common.Repository
 
 				PhotosUpdating = false;
 			};
-
-			using (var manager = new DownloadManager(Configuration.Get("imageURL")))
+			
+			using (var manager = new DownloadManager(Properties.Settings.Default.imageURL))
 			{
-				manager.DownloadAsBytes(filename, callback, out string errorMessage);
+				manager.DownloadAsBytes(filename, downloadCallback, out string errorMessage);
 			};
 		}
 
-		private static void UpdateProductInventory(Product product, StockLevel stockLevel, string pack)
+		private static ShoppingCart LoadShoppingCart()
 		{
-			var productInventory = new ProductInventory(product, stockLevel, pack);
+			ShoppingCart shoppingCart = Repository
+										.Context
+										.ShoppingCarts
+										.Include(sc => sc.ShoppingCartItems)
+										.SingleOrDefault();
+
+			if (shoppingCart == null)
+			{
+				shoppingCart = new ShoppingCart(ShoppingCartStatus.Pending);
+				shoppingCart.Save(true);
+			}
+
+			return shoppingCart;
+		}
+
+		private static void UpdateInventory(Product product, StockLevel stockLevel, String pack)
+		{
+			var productInventory = new Inventory(product, stockLevel, pack);
 			var dbItem = Repository.Context
-									.ProductInventories
+									.Inventories
 									.Where(pi => product.ProductID == pi.ProductID)
 									.SingleOrDefault();
 			dbItem?.Update(productInventory);
@@ -365,34 +362,27 @@ namespace Catalog.Common.Repository
 			dbItem?.Update(cartItem);
 		}
 
-		private static ShoppingCart InitShoppingCart()
-		{
-			ShoppingCart shoppingCart = Repository
-										.Context
-										.ShoppingCarts
-										.Include(sc => sc.ShoppingCartItems)
-										.SingleOrDefault();
-
-			if (shoppingCart == null)
-			{
-				shoppingCart = new ShoppingCart(ShoppingCartStatus.PENDING);
-				shoppingCart.Save();
-			}
-
-			return shoppingCart;
-		}
-
 		#region Logging
 
-		private static void Log(String message, params object[] args)
+		private static void Log(String message, params Object[] args)
 		{
 			Log(message, ContentAlignment.MiddleLeft, args);
 		}
 
-		private static void Log(String message, ContentAlignment alignment, params object[] args)
+		private static void Log(String message, ContentAlignment alignment, params Object[] args)
 		{
 			var logMessage = String.Format(message, args);
 			LoggingCallback?.Invoke(logMessage, alignment);
+		}
+
+		private static void OnSuccess() 
+		{
+			SuccessCallback?.Invoke();
+		}
+
+		private static void OnError()
+		{
+			SuccessCallback?.Invoke();
 		}
 
 		#endregion

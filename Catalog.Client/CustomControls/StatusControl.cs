@@ -16,9 +16,9 @@ namespace Catalog.Client
         {
             new MaterialBlueGreyTheme();
             InitializeComponent();
-            this.companyMailLabel.Text = "info@sbm-nn.ru";
-            UpdateStatus.Text = $"<html>Последнее обновление: <b>{System.DateTime.Now}</b>";
-            ViewLabel.Text = "© 2021 Центр оптовой торговли ТД СБМ-Волга, Россия, г. Нижний Новгород";
+            this.companyMailLabel.Text = Common.MESSAGE.Gui.COMPANY_MAIL;
+            UpdateStatus.Text = string.Format(Common.MESSAGE.Gui.UPDATE_STATUS, System.DateTime.Now);
+            ViewLabel.Text = string.Format(Common.MESSAGE.Gui.COMPANY_INFO, System.DateTime.Now.Year);
             ThemeResolutionService.ApplicationThemeName = "MaterialBlueGrey";
         }
 

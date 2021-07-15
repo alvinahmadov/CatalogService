@@ -33,7 +33,7 @@ namespace Catalog.Client
 		{
 			this.tableLayoutPanelTop = new System.Windows.Forms.TableLayoutPanel();
 			this.tableLayoutPanelBottom = new System.Windows.Forms.TableLayoutPanel();
-			this.topControl = new TopControl();
+			this.topControl = new TopControl(this);
 			this.radCollapsiblePanel = new Telerik.WinControls.UI.RadCollapsiblePanel();
 			this.radTreeView = new Telerik.WinControls.UI.RadTreeView();
 			this.tabEdgeShape = new Telerik.WinControls.UI.TabEdgeShape();
@@ -110,7 +110,7 @@ namespace Catalog.Client
 			this.radCollapsiblePanel.HorizontalHeaderAlignment = Telerik.WinControls.UI.RadHorizontalAlignment.Center;
 			this.radCollapsiblePanel.Location = new System.Drawing.Point(0, 0);
 			this.radCollapsiblePanel.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
-			this.radCollapsiblePanel.Size = new System.Drawing.Size(CollapsiblePanelMaxWidth, 600);
+			this.radCollapsiblePanel.Size = new System.Drawing.Size(collapsiblePanelMaxWidth, 600);
 			this.radCollapsiblePanel.Name = "radLeftCollapsiblePanel";
 			this.radCollapsiblePanel.PanelContainer.Controls.Add(this.radTreeView);
 			this.radCollapsiblePanel.PanelContainer.Location = new System.Drawing.Point(0, 0);
@@ -192,7 +192,7 @@ namespace Catalog.Client
 			this.ClientSize = new System.Drawing.Size(1276, 880);
 			this.Controls.Add(this.tableLayoutPanelTop);
 			this.Name = "MainForm";
-			this.Text = "RadForm1";
+			this.Text = "Каталог";
 			this.MinimumSize = new System.Drawing.Size(800, 800);
 
 			this.tableLayoutPanelTop.ResumeLayout(false);

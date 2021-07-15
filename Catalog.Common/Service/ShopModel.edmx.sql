@@ -2,7 +2,7 @@
 -- --------------------------------------------------
 -- Entity Designer DDL Script for SQL Server 2005, 2008, 2012 and Azure
 -- --------------------------------------------------
--- Date Created: 07/14/2021 08:12:13
+-- Date Created: 07/15/2021 08:55:25
 -- Generated from EDMX file: C:\Users\Alvin\source\repos\Catalog\Catalog.Common\Service\ShopModel.edmx
 -- --------------------------------------------------
 
@@ -17,23 +17,23 @@ GO
 -- Dropping existing FOREIGN KEY constraints
 -- --------------------------------------------------
 
-IF OBJECT_ID(N'[dbo].[FK_Product_ProductSubcategory_ProductSubcategoryID]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[Products] DROP CONSTRAINT [FK_Product_ProductSubcategory_ProductSubcategoryID];
+IF OBJECT_ID(N'[dbo].[FK_Product_Subcategory_SubcategoryID]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[Products] DROP CONSTRAINT [FK_Product_Subcategory_SubcategoryID];
 GO
 IF OBJECT_ID(N'[dbo].[FK_SpecialOfferProduct_Product_ProductID]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[SpecialOfferProducts] DROP CONSTRAINT [FK_SpecialOfferProduct_Product_ProductID];
 GO
-IF OBJECT_ID(N'[dbo].[FK_ProductSubcategory_ProductCategory_ProductCategoryID]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[ProductSubcategories] DROP CONSTRAINT [FK_ProductSubcategory_ProductCategory_ProductCategoryID];
+IF OBJECT_ID(N'[dbo].[FK_Subcategory_Category_CategoryID]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[Subcategories] DROP CONSTRAINT [FK_Subcategory_Category_CategoryID];
 GO
 IF OBJECT_ID(N'[dbo].[FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[SpecialOfferProducts] DROP CONSTRAINT [FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID];
 GO
-IF OBJECT_ID(N'[dbo].[FK_ProductPhotoProduct]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[ProductPhotoes] DROP CONSTRAINT [FK_ProductPhotoProduct];
+IF OBJECT_ID(N'[dbo].[FK_Product_Photo_ProductID]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[Photos] DROP CONSTRAINT [FK_Product_Photo_ProductID];
 GO
-IF OBJECT_ID(N'[dbo].[FK_Product_ProductInventory]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[ProductInventories] DROP CONSTRAINT [FK_Product_ProductInventory];
+IF OBJECT_ID(N'[dbo].[FK_Product_ProductInventory_ID]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[Inventories] DROP CONSTRAINT [FK_Product_ProductInventory_ID];
 GO
 IF OBJECT_ID(N'[dbo].[FK_ShoppingCartShoppingCartItem]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[ShoppingCartItems] DROP CONSTRAINT [FK_ShoppingCartShoppingCartItem];
@@ -41,8 +41,8 @@ GO
 IF OBJECT_ID(N'[dbo].[FK_UserSpecialOfferProduct]', 'F') IS NOT NULL
     ALTER TABLE [dbo].[SpecialOfferProducts] DROP CONSTRAINT [FK_UserSpecialOfferProduct];
 GO
-IF OBJECT_ID(N'[dbo].[FK_ShoppingCartItemProduct]', 'F') IS NOT NULL
-    ALTER TABLE [dbo].[ShoppingCartItems] DROP CONSTRAINT [FK_ShoppingCartItemProduct];
+IF OBJECT_ID(N'[dbo].[FK_ShoppingCartItem_Product_ID]', 'F') IS NOT NULL
+    ALTER TABLE [dbo].[ShoppingCartItems] DROP CONSTRAINT [FK_ShoppingCartItem_Product_ID];
 GO
 
 -- --------------------------------------------------
@@ -55,14 +55,14 @@ GO
 IF OBJECT_ID(N'[dbo].[Products]', 'U') IS NOT NULL
     DROP TABLE [dbo].[Products];
 GO
-IF OBJECT_ID(N'[dbo].[ProductCategories]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[ProductCategories];
+IF OBJECT_ID(N'[dbo].[Categories]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[Categories];
 GO
-IF OBJECT_ID(N'[dbo].[ProductPhotoes]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[ProductPhotoes];
+IF OBJECT_ID(N'[dbo].[Photos]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[Photos];
 GO
-IF OBJECT_ID(N'[dbo].[ProductSubcategories]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[ProductSubcategories];
+IF OBJECT_ID(N'[dbo].[Subcategories]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[Subcategories];
 GO
 IF OBJECT_ID(N'[dbo].[TransactionHistories]', 'U') IS NOT NULL
     DROP TABLE [dbo].[TransactionHistories];
@@ -79,8 +79,8 @@ GO
 IF OBJECT_ID(N'[dbo].[Users]', 'U') IS NOT NULL
     DROP TABLE [dbo].[Users];
 GO
-IF OBJECT_ID(N'[dbo].[ProductInventories]', 'U') IS NOT NULL
-    DROP TABLE [dbo].[ProductInventories];
+IF OBJECT_ID(N'[dbo].[Inventories]', 'U') IS NOT NULL
+    DROP TABLE [dbo].[Inventories];
 GO
 IF OBJECT_ID(N'[dbo].[ShoppingCarts]', 'U') IS NOT NULL
     DROP TABLE [dbo].[ShoppingCarts];
@@ -107,7 +107,7 @@ GO
 CREATE TABLE [dbo].[Products] (
     [ID] int IDENTITY(1,1) NOT NULL,
     [ProductID] int  NOT NULL,
-    [ProductSubcategoryID] int  NULL,
+    [SubcategoryID] int  NULL,
     [ArticleNumber] nvarchar(max)  NOT NULL,
     [Code] nvarchar(max)  NOT NULL,
     [Brand] nvarchar(max)  NOT NULL,
@@ -119,17 +119,17 @@ CREATE TABLE [dbo].[Products] (
 );
 GO
 
--- Creating table 'ProductCategories'
-CREATE TABLE [dbo].[ProductCategories] (
-    [ProductCategoryID] int IDENTITY(1,1) NOT NULL,
+-- Creating table 'Categories'
+CREATE TABLE [dbo].[Categories] (
+    [CategoryID] int IDENTITY(1,1) NOT NULL,
     [Name] nvarchar(50)  NOT NULL,
     [rowguid] uniqueidentifier  NOT NULL,
     [ModifiedDate] datetime  NOT NULL
 );
 GO
 
--- Creating table 'ProductPhotoes'
-CREATE TABLE [dbo].[ProductPhotoes] (
+-- Creating table 'Photos'
+CREATE TABLE [dbo].[Photos] (
     [ID] int  NOT NULL,
     [ProductID] int  NOT NULL,
     [FileName] nvarchar(50)  NULL,
@@ -139,10 +139,10 @@ CREATE TABLE [dbo].[ProductPhotoes] (
 );
 GO
 
--- Creating table 'ProductSubcategories'
-CREATE TABLE [dbo].[ProductSubcategories] (
-    [ProductSubcategoryID] int IDENTITY(1,1) NOT NULL,
-    [ProductCategoryID] int  NOT NULL,
+-- Creating table 'Subcategories'
+CREATE TABLE [dbo].[Subcategories] (
+    [SubcategoryID] int IDENTITY(1,1) NOT NULL,
+    [CategoryID] int  NOT NULL,
     [ChildSubcategoryID] int  NULL,
     [Name] nvarchar(50)  NOT NULL,
     [rowguid] uniqueidentifier  NOT NULL,
@@ -209,12 +209,12 @@ CREATE TABLE [dbo].[Users] (
 );
 GO
 
--- Creating table 'ProductInventories'
-CREATE TABLE [dbo].[ProductInventories] (
+-- Creating table 'Inventories'
+CREATE TABLE [dbo].[Inventories] (
     [ID] int  NOT NULL,
     [ProductID] int  NOT NULL,
-    [ProductCategoryID] int  NOT NULL,
-    [ProductSubcategoryID] int  NULL,
+    [CategoryID] int  NOT NULL,
+    [SubcategoryID] int  NULL,
     [StockLevel1] nvarchar(max)  NOT NULL,
     [StockLevel2] nvarchar(max)  NOT NULL,
     [Pack] nvarchar(max)  NOT NULL,
@@ -237,9 +237,10 @@ GO
 -- Creating table 'Settings'
 CREATE TABLE [dbo].[Settings] (
     [ID] int IDENTITY(1,1) NOT NULL,
-    [UpdateInterval] int  NOT NULL,
     [AskConfirmation] bit  NOT NULL,
     [LoadImage] bit  NOT NULL,
+    [UpdateInterval] int  NOT NULL,
+    [LeftPanelWidth] smallint  NOT NULL,
     [ModifiedDate] datetime  NOT NULL
 );
 GO
@@ -260,22 +261,22 @@ ADD CONSTRAINT [PK_Products]
     PRIMARY KEY CLUSTERED ([ID] ASC);
 GO
 
--- Creating primary key on [ProductCategoryID] in table 'ProductCategories'
-ALTER TABLE [dbo].[ProductCategories]
-ADD CONSTRAINT [PK_ProductCategories]
-    PRIMARY KEY CLUSTERED ([ProductCategoryID] ASC);
+-- Creating primary key on [CategoryID] in table 'Categories'
+ALTER TABLE [dbo].[Categories]
+ADD CONSTRAINT [PK_Categories]
+    PRIMARY KEY CLUSTERED ([CategoryID] ASC);
 GO
 
--- Creating primary key on [ID] in table 'ProductPhotoes'
-ALTER TABLE [dbo].[ProductPhotoes]
-ADD CONSTRAINT [PK_ProductPhotoes]
+-- Creating primary key on [ID] in table 'Photos'
+ALTER TABLE [dbo].[Photos]
+ADD CONSTRAINT [PK_Photos]
     PRIMARY KEY CLUSTERED ([ID] ASC);
 GO
 
--- Creating primary key on [ProductSubcategoryID] in table 'ProductSubcategories'
-ALTER TABLE [dbo].[ProductSubcategories]
-ADD CONSTRAINT [PK_ProductSubcategories]
-    PRIMARY KEY CLUSTERED ([ProductSubcategoryID] ASC);
+-- Creating primary key on [SubcategoryID] in table 'Subcategories'
+ALTER TABLE [dbo].[Subcategories]
+ADD CONSTRAINT [PK_Subcategories]
+    PRIMARY KEY CLUSTERED ([SubcategoryID] ASC);
 GO
 
 -- Creating primary key on [TransactionID] in table 'TransactionHistories'
@@ -308,9 +309,9 @@ ADD CONSTRAINT [PK_Users]
     PRIMARY KEY CLUSTERED ([UserID] ASC);
 GO
 
--- Creating primary key on [ID] in table 'ProductInventories'
-ALTER TABLE [dbo].[ProductInventories]
-ADD CONSTRAINT [PK_ProductInventories]
+-- Creating primary key on [ID] in table 'Inventories'
+ALTER TABLE [dbo].[Inventories]
+ADD CONSTRAINT [PK_Inventories]
     PRIMARY KEY CLUSTERED ([ID] ASC);
 GO
 
@@ -330,19 +331,19 @@ GO
 -- Creating all FOREIGN KEY constraints
 -- --------------------------------------------------
 
--- Creating foreign key on [ProductSubcategoryID] in table 'Products'
+-- Creating foreign key on [SubcategoryID] in table 'Products'
 ALTER TABLE [dbo].[Products]
-ADD CONSTRAINT [FK_Product_ProductSubcategory_ProductSubcategoryID]
-    FOREIGN KEY ([ProductSubcategoryID])
-    REFERENCES [dbo].[ProductSubcategories]
-        ([ProductSubcategoryID])
+ADD CONSTRAINT [FK_Product_Subcategory_SubcategoryID]
+    FOREIGN KEY ([SubcategoryID])
+    REFERENCES [dbo].[Subcategories]
+        ([SubcategoryID])
     ON DELETE CASCADE ON UPDATE NO ACTION;
 GO
 
--- Creating non-clustered index for FOREIGN KEY 'FK_Product_ProductSubcategory_ProductSubcategoryID'
-CREATE INDEX [IX_FK_Product_ProductSubcategory_ProductSubcategoryID]
+-- Creating non-clustered index for FOREIGN KEY 'FK_Product_Subcategory_SubcategoryID'
+CREATE INDEX [IX_FK_Product_Subcategory_SubcategoryID]
 ON [dbo].[Products]
-    ([ProductSubcategoryID]);
+    ([SubcategoryID]);
 GO
 
 -- Creating foreign key on [ID] in table 'SpecialOfferProducts'
@@ -360,19 +361,19 @@ ON [dbo].[SpecialOfferProducts]
     ([ID]);
 GO
 
--- Creating foreign key on [ProductCategoryID] in table 'ProductSubcategories'
-ALTER TABLE [dbo].[ProductSubcategories]
-ADD CONSTRAINT [FK_ProductSubcategory_ProductCategory_ProductCategoryID]
-    FOREIGN KEY ([ProductCategoryID])
-    REFERENCES [dbo].[ProductCategories]
-        ([ProductCategoryID])
+-- Creating foreign key on [CategoryID] in table 'Subcategories'
+ALTER TABLE [dbo].[Subcategories]
+ADD CONSTRAINT [FK_Subcategory_Category_CategoryID]
+    FOREIGN KEY ([CategoryID])
+    REFERENCES [dbo].[Categories]
+        ([CategoryID])
     ON DELETE CASCADE ON UPDATE NO ACTION;
 GO
 
--- Creating non-clustered index for FOREIGN KEY 'FK_ProductSubcategory_ProductCategory_ProductCategoryID'
-CREATE INDEX [IX_FK_ProductSubcategory_ProductCategory_ProductCategoryID]
-ON [dbo].[ProductSubcategories]
-    ([ProductCategoryID]);
+-- Creating non-clustered index for FOREIGN KEY 'FK_Subcategory_Category_CategoryID'
+CREATE INDEX [IX_FK_Subcategory_Category_CategoryID]
+ON [dbo].[Subcategories]
+    ([CategoryID]);
 GO
 
 -- Creating foreign key on [SpecialOfferID] in table 'SpecialOfferProducts'
@@ -384,18 +385,18 @@ ADD CONSTRAINT [FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID]
     ON DELETE NO ACTION ON UPDATE NO ACTION;
 GO
 
--- Creating foreign key on [ID] in table 'ProductPhotoes'
-ALTER TABLE [dbo].[ProductPhotoes]
-ADD CONSTRAINT [FK_ProductPhotoProduct]
+-- Creating foreign key on [ID] in table 'Photos'
+ALTER TABLE [dbo].[Photos]
+ADD CONSTRAINT [FK_Product_Photo_ProductID]
     FOREIGN KEY ([ID])
     REFERENCES [dbo].[Products]
         ([ID])
     ON DELETE NO ACTION ON UPDATE NO ACTION;
 GO
 
--- Creating foreign key on [ID] in table 'ProductInventories'
-ALTER TABLE [dbo].[ProductInventories]
-ADD CONSTRAINT [FK_Product_ProductInventory]
+-- Creating foreign key on [ID] in table 'Inventories'
+ALTER TABLE [dbo].[Inventories]
+ADD CONSTRAINT [FK_Product_ProductInventory_ID]
     FOREIGN KEY ([ID])
     REFERENCES [dbo].[Products]
         ([ID])
@@ -434,7 +435,7 @@ GO
 
 -- Creating foreign key on [ID] in table 'ShoppingCartItems'
 ALTER TABLE [dbo].[ShoppingCartItems]
-ADD CONSTRAINT [FK_ShoppingCartItemProduct]
+ADD CONSTRAINT [FK_ShoppingCartItem_Product_ID]
     FOREIGN KEY ([ID])
     REFERENCES [dbo].[Products]
         ([ID])

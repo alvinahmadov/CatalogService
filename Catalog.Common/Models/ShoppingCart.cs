@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+
+using Catalog.Common.Repository;
 
 namespace Catalog.Common.Service
 {
-	public partial class ShoppingCart : EntityModel
+	public partial class ShoppingCart : Entity
 	{
 		public ShoppingCart(ShoppingCartStatus shoppingCartStatus)
 		{
@@ -16,41 +17,36 @@ namespace Catalog.Common.Service
 			this.ShoppingCartItems = new HashSet<ShoppingCartItem>();
 		}
 
-		public override void Save(bool isAddingItem = true, bool commit = false)
+		public static void SaveRange(List<ShoppingCart> range, bool commit = true)
 		{
-			try
-			{
-				if (isAddingItem)
-				{
-					Repository.Repository.Context.ShoppingCarts.Add(this);
-				}
+			Repository.Repository.Context.ShoppingCarts.AddRange(range);
 
-
-				if (commit)
-				{
-					Debug.WriteLine("Commit at ShoppingCart.Save");
-					Commit();
-				}
-			}
-			catch { }
+			if (commit)
+				Commit();
 		}
 
-		public override bool Update(object entity, bool commit)
+		public override void Save(Boolean commit = false)
 		{
-			var cart = entity as ShoppingCart;
+			Repository.Repository.Context.ShoppingCarts.Add(this);
 
-			if (this.Status != cart.Status &&
-				this.TotalPrice != cart.TotalPrice &&
-				this.TotalQuantity != cart.TotalQuantity
-			)
+			if (commit)
+				Commit();
+		}
+
+		public override Boolean Update(in Object entity)
+		{
+			if (entity == null)
+				return false;
+
+			var other = entity as ShoppingCart;
+
+			if (!Equals(other))
 			{
-				this.Status = cart.Status;
-				this.TotalPrice = cart.TotalPrice;
-				this.TotalQuantity = cart.TotalQuantity;
-				this.ShoppingCartItems = cart.ShoppingCartItems;
+				this.Status = other.Status;
+				this.TotalQuantity = other.TotalQuantity;
+				this.TotalPrice = other.TotalPrice;
+				this.ShoppingCartItems = other.ShoppingCartItems;
 				this.ModifiedDate = DateTime.Now;
-				if (commit)
-					Save(!commit, commit);
 
 				return true;
 			}
@@ -61,7 +57,36 @@ namespace Catalog.Common.Service
 		public override void Delete()
 		{
 			Repository.Repository.Context.ShoppingCarts.Remove(this);
-			Save(false, true);
+			Commit();
+		}
+
+		public override Boolean Equals(Object obj)
+		{
+			var entity = obj as ShoppingCart;
+
+			var equals = (this.Status == entity.Status) &&
+						(this.TotalQuantity == entity.TotalQuantity) &&
+						(this.TotalPrice == entity.TotalPrice);
+
+			return equals;
+		}
+
+		public override Int32 GetHashCode()
+		{
+			return this.ShoppingCartID.GetHashCode()
+			^ this.TotalPrice.GetHashCode() 
+			^ this.TotalQuantity.GetHashCode();
+		}
+
+		public override String ToString()
+		{
+			return $"ShoppingCart<[" +
+			$"Status: {this.Status}, " +
+			$"TotalQuantity: {this.TotalQuantity}, " +
+			$"TotalPrice: {this.TotalPrice}, " +
+			$"DateCreated: {this.DateCreated}, " +
+			$"ModifiedDate: {this.ModifiedDate}" +
+			$"]>";
 		}
 	}
 }

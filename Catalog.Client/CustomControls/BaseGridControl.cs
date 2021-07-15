@@ -24,7 +24,7 @@ namespace Catalog.Client
 	{
 		#region Properties
 
-		public static InventoryCollection ProductInventories { get; set; } = new InventoryCollection();
+		public static GridItemCollection ProductInventories { get; set; } = new GridItemCollection();
 
 		public static SearchTextBox SearchTextBox { set; get; }
 
@@ -86,7 +86,7 @@ namespace Catalog.Client
 			this.radToTextBox.Leave += RadTextBox_Leave;
 		}
 
-		protected void ShowScreenTipForCell(VirtualGridCellElement cell, Int32 cellIndex, ProductInventory inventory)
+		protected void ShowScreenTipForCell(VirtualGridCellElement cell, Int32 cellIndex, Inventory inventory)
 		{
 			using (var defaultFont = new Font("Segoe UI", 14F))
 			{
@@ -102,7 +102,7 @@ namespace Catalog.Client
 				screenTip.CaptionLabel.TextWrap = true;
 				screenTip.CaptionLabel.CustomFontSize = 12F;
 
-				var imgData = MainRepository.ProductPhotoCache
+				var imgData = MainRepository.PhotoCache
 											.Where(p => p.ProductID == inventory.ProductID)
 											.FirstOrDefault();
 
@@ -115,7 +115,7 @@ namespace Catalog.Client
 				{
 					Image tipImage = ImageUtil.GetImage(imgData.LargePhoto);
 
-					int width = tipImage.Width,
+					Int32 width = tipImage.Width,
 						height = Int32.MaxValue;
 					screenTip.MaxSize = new Size(width, height);
 					screenTip.MainTextLabel.Image = tipImage;
@@ -245,7 +245,7 @@ namespace Catalog.Client
 
 		protected String exportFileName;
 
-		protected ISavableObject currentItem;
+		protected IEntity currentItem;
 
 		#endregion
 	}

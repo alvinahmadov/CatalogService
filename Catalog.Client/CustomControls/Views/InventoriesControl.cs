@@ -15,11 +15,10 @@ using Catalog.Common.Service;
 using Catalog.Common.Repository;
 using Catalog.Client.Properties;
 
+using FilterPredicate = System.Linq.Expressions.Expression<System.Func<Catalog.Common.Service.Inventory, System.Boolean>>;
 
 namespace Catalog.Client
 {
-	using FilterPredicate = System.Linq.Expressions.Expression<Func<ProductInventory, bool>>;
-
 	sealed class InventoriesControl : BaseGridControl
 	{
 		#region Properties
@@ -44,7 +43,7 @@ namespace Catalog.Client
 		/// <summary>
 		/// Used to get products after applying some filtering
 		/// </summary>
-		Action<DbQuery<ProductInventory>> QueryCallback { get; set; }
+		Action<DbQuery<Inventory>> QueryCallback { get; set; }
 
 		#endregion
 
@@ -71,7 +70,7 @@ namespace Catalog.Client
 				{
 					this.data = query.ToList();
 					this.GridControl.RowCount = data.Count;
-					cellElements.ForEach(el => (el as QuantityCellElement).ProductInventories = data);
+					cellElements.ForEach(el => (el as GridElement).productInventories = data);
 					this.GridControl.TableElement.SynchronizeRows();
 					this.GridControl.MasterViewInfo.MinColumnWidth = 100;
 				}
@@ -108,10 +107,10 @@ namespace Catalog.Client
 			if (productTag.IsZero)
 				pred = null;
 			else if (productTag.SID == -1)
-				pred = p => productTag.CID == p.ProductCategoryID;
+				pred = p => productTag.CID == p.CategoryID;
 			else
-				pred = p => productTag.SID == p.ProductSubcategoryID
-						 && productTag.CID == p.ProductCategoryID;
+				pred = p => productTag.SID == p.SubcategoryID
+						 && productTag.CID == p.CategoryID;
 
 			FilterDataAsync(pred);
 		}
@@ -138,13 +137,13 @@ namespace Catalog.Client
 
 			var task = Task.Run(() =>
 			{
-				DbQuery<ProductInventory> inventories = null;
+				DbQuery<Inventory> inventories = null;
 				if (predicate != null)
-					inventories = Repository.Context.ProductInventories
+					inventories = Repository.Context.Inventories
 													.Where(predicate)
-													as DbQuery<ProductInventory>;
+													as DbQuery<Inventory>;
 				else
-					inventories = Repository.Context.ProductInventories;
+					inventories = Repository.Context.Inventories;
 
 				var query = inventories;
 				query = SortHelper.ProductInventorySort(query, sortMode, GridControl.SortDescriptors);
@@ -175,11 +174,11 @@ namespace Catalog.Client
 				switch (e.ColumnIndex)
 				{
 					case 0:
-						e.CellElement = new ProductPhotoCellElement();
+						e.CellElement = new PhotoCellElement();
 						break;
 					case 6:
-						e.CellElement = new QuantityCellElement(ProductInventories, e.ColumnIndex)
-						{ ProductInventories = data };
+						e.CellElement = new GridElement(ProductInventories, e.ColumnIndex)
+						{ productInventories = data };
 						this.cellElements.Add(e.CellElement);
 						break;
 				}
@@ -208,7 +207,7 @@ namespace Catalog.Client
 				{
 					var rowData = data[e.RowIndex];
 					var photo = Properties.Settings.Default.LoadImage
-						? MainRepository.ProductPhotoCache.Find(p => p.ProductID == rowData.ProductID)
+						? MainRepository.PhotoCache.Find(p => p.ProductID == rowData.ProductID)
 						: null;
 
 					Image image = ImageUtil.GetImage(photo?.ThumbNailPhoto, Resources.placeholder);
@@ -291,13 +290,13 @@ namespace Catalog.Client
 				else if (productTag.SID == -1)
 				{
 					pred = (p => (p.Product.Price >= MinPrice && p.Product.Price <= MaxPrice) &&
-									p.Product.ProductSubcategory.ProductCategoryID == productTag.CID);
+									p.Product.Subcategory.CategoryID == productTag.CID);
 				}
 				else
 				{
 					pred = (p => (p.Product.Price >= MinPrice && p.Product.Price <= MaxPrice) &&
-								(p.Product.ProductSubcategoryID == productTag.SID &&
-								 p.Product.ProductSubcategory.ProductCategoryID == productTag.CID));
+								(p.Product.SubcategoryID == productTag.SID &&
+								 p.Product.Subcategory.CategoryID == productTag.CID));
 				}
 				IsPriceFilterApplied = true;
 				FilterDataAsync(pred);
@@ -432,13 +431,13 @@ namespace Catalog.Client
 			names.RemoveAt(0);
 			names.RemoveAt(columnNames.Count - 1);
 			var tag = this.Tag as ProductTag;
-			var categoryName = MainRepository.ProductCategoriesCache
-											.Where(c => true && c.ProductCategoryID == tag.CID)
+			var categoryName = MainRepository.CategoriesCache
+											.Where(c => true && c.CategoryID == tag.CID)
 											.SingleOrDefault()?
 											.Name;
 
-			var subcategoryName = MainRepository.ProductSubcategoriesCache
-												.Where(c => true && c.ProductSubcategoryID == tag.SID)
+			var subcategoryName = MainRepository.SubcategoriesCache
+												.Where(c => true && c.SubcategoryID == tag.SID)
 												.SingleOrDefault()?
 												.Name;
 
@@ -515,7 +514,7 @@ namespace Catalog.Client
 
 		#region Fields
 
-		private List<ProductInventory> data = new List<ProductInventory>();
+		private List<Inventory> data = new List<Inventory>();
 
 		private ProductInventorySortMode sortMode = ProductInventorySortMode.None;
 

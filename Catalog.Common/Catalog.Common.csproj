@@ -110,14 +110,14 @@
     <Compile Include="Helpers\StockLevel.cs" />
     <Compile Include="Helpers\UpdateTimer.cs" />
     <Compile Include="Helpers\Utility.cs" />
-    <Compile Include="Interfaces\ISavableObject.cs" />
-    <Compile Include="Models\EntityModel.cs" />
-    <Compile Include="Models\ProductPhoto.cs" />
-    <Compile Include="Models\ProductSubcategory.cs" />
-    <Compile Include="Models\ProductCategory.cs" />
+    <Compile Include="Interfaces\IEntity.cs" />
+    <Compile Include="Core\Entity.cs" />
+    <Compile Include="Models\Photo.cs" />
+    <Compile Include="Models\Subcategory.cs" />
+    <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Product.cs" />
-    <Compile Include="Models\ProductInventory.cs" />
+    <Compile Include="Models\Inventory.cs" />
     <Compile Include="Models\ShoppingCart.cs" />
     <Compile Include="Models\ShoppingCartItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -131,22 +131,19 @@
     <Compile Include="Repository\Repository.cs" />
     <Compile Include="Repository\WebWorker.cs" />
     <Compile Include="Repository\WebWorker.Properties.cs" />
+    <Compile Include="Service\Category.cs">
+      <DependentUpon>ShopModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Service\Inventory.cs">
+      <DependentUpon>ShopModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Service\Location.cs">
       <DependentUpon>ShopModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Service\Photo.cs">
+      <DependentUpon>ShopModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Service\Product.cs">
-      <DependentUpon>ShopModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Service\ProductCategory.cs">
-      <DependentUpon>ShopModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Service\ProductInventory.cs">
-      <DependentUpon>ShopModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Service\ProductPhoto.cs">
-      <DependentUpon>ShopModel.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Service\ProductSubcategory.cs">
       <DependentUpon>ShopModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Service\Settings.cs">
@@ -177,6 +174,9 @@
       <DependentUpon>ShopModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Service\SpecialOfferProduct.cs">
+      <DependentUpon>ShopModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Service\Subcategory.cs">
       <DependentUpon>ShopModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Service\TransactionHistory.cs">

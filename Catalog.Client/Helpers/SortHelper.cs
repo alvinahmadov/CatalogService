@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 using Telerik.WinControls.Data;
 
-using ProductInventoryDataQuery = System.Data.Entity.Infrastructure.DbQuery<Catalog.Common.Service.ProductInventory>;
+using ProductInventoryDataQuery = System.Data.Entity.Infrastructure.DbQuery<Catalog.Common.Service.Inventory>;
 
 namespace Catalog.Client
 {

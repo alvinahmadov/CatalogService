@@ -38,7 +38,7 @@ namespace Catalog.Client
 		/// <summary>
 		/// Removes cart item from list
 		/// </summary>
-		Action<int, Inventory> CartItemCallback { get; set; }
+		Action<int, GridItem> CartItemCallback { get; set; }
 
 		/// <summary>
 		/// Used to fill cart with products
@@ -96,9 +96,7 @@ namespace Catalog.Client
 					cart.TotalQuantity = 0;
 					cart.TotalPrice = 0M;
 					cart.Status = (byte)(ShoppingCartStatus.Pending);
-
-					Debug.WriteLine("Commit at ShoppingCartControl.RemoveCartCallback");
-					EntityModel.Commit();
+					Entity.Commit();
 
 					var shoppingStatus = String.Format(
 						MESSAGE.Gui.ORDERS_STATUS_TEMPLATE,
@@ -113,7 +111,7 @@ namespace Catalog.Client
 			};
 
 			/// Used to delete cart item from list
-			CartItemCallback = (rowIndex, inventory) =>
+			CartItemCallback = (rowIndex, gridItem) =>
 			{
 				try
 				{
@@ -122,11 +120,11 @@ namespace Catalog.Client
 
 					if (cartItem != null)
 					{
-						if (inventory != null)
+						if (gridItem != null)
 						{
-							cart.TotalQuantity = Inventory.ShoppingCart.TotalQuantity;
-							cart.TotalPrice = Inventory.ShoppingCart.TotalPrice;
-							cartItem.Quantity = inventory.Quantity;
+							cart.TotalQuantity = GridItem.ShoppingCart.TotalQuantity;
+							cart.TotalPrice = GridItem.ShoppingCart.TotalPrice;
+							cartItem.Quantity = gridItem.Quantity;
 						}
 						else
 						{
@@ -145,7 +143,7 @@ namespace Catalog.Client
 
 						TopButton.Text = shoppingStatus;
 						MainForm.StatusLabelElement.Text = shoppingStatus;
-						EntityModel.Commit();
+						Entity.Commit();
 
 						RefreshDetailsData();
 						if (detailsData.Count == 0)
@@ -220,7 +218,7 @@ namespace Catalog.Client
 				GridControl.MasterViewInfo.ExpandRow(0);
 				GridControl.MasterViewInfo.Padding = new Padding(0, 100, 0, 100);
 				ChildViewInfo.AutoSizeColumnsMode = VirtualGridAutoSizeColumnsMode.Fill;
-				cellElements.ForEach(el => el.CartItems = detailsData);
+				cellElements.ForEach(el => el.productCartItems = detailsData);
 			}
 			else ChildViewInfo = null;
 		}
@@ -278,15 +276,15 @@ namespace Catalog.Client
 						switch (e.ColumnIndex)
 						{
 							case 0:
-								e.CellElement = new ProductPhotoCellElement();
+								e.CellElement = new PhotoCellElement();
 								break;
 							case 8:
-								var quantityCellElement = new QuantityCellElement(ProductInventories, e.ColumnIndex)
+								var quantityCellElement = new GridElement(ProductInventories, e.ColumnIndex)
 								{
-									CartItems = detailsData,
-									Callback = (index, inventory) =>
+									productCartItems = detailsData,
+									Callback = (index, gridItem) =>
 									{
-										CartItemCallback(index, inventory);
+										CartItemCallback(index, gridItem);
 									}
 								};
 								e.CellElement = quantityCellElement;
@@ -382,11 +380,11 @@ namespace Catalog.Client
 					if (detailsData.Count > 0)
 					{
 						var rowData = detailsData[e.RowIndex];
-						var inventory = MainRepository.ProductInventoriesCache
+						var inventory = MainRepository.InventoriesCache
 													  .Where(pi => pi.ProductID == rowData.ProductID)
 													  .SingleOrDefault();
 						var photo = Properties.Settings.Default.LoadImage
-												? MainRepository.ProductPhotoCache.Find(p => p.ProductID == rowData.ProductID)
+												? MainRepository.PhotoCache.Find(p => p.ProductID == rowData.ProductID)
 												: null;
 
 						Image image = ImageUtil.GetImage(photo?.ThumbNailPhoto, Resources.placeholder);
@@ -509,7 +507,7 @@ namespace Catalog.Client
 				{
 					if (cell.ColumnIndex == 0)
 					{
-						var inventory = MainRepository.ProductInventoriesCache
+						var inventory = MainRepository.InventoriesCache
 										.Where(p => p.ProductID == detailsData[cellIndex].ProductID)
 										.SingleOrDefault();
 						ShowScreenTipForCell(cell, cellIndex, inventory);
@@ -541,7 +539,7 @@ namespace Catalog.Client
 								"<html><b>Подключение</b>"
 								);
 				cart.Status = (byte)ShoppingCartStatus.Pending;
-				cart.Save(false, true);
+				Entity.Commit();
 				return;
 			}
 
@@ -680,7 +678,7 @@ namespace Catalog.Client
 
 		private List<ShoppingCartItem> detailsData = new List<ShoppingCartItem>();
 
-		private readonly List<QuantityCellElement> cellElements = new List<QuantityCellElement>();
+		private readonly List<GridElement> cellElements = new List<GridElement>();
 
 		#endregion
 	}

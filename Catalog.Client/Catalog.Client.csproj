@@ -223,8 +223,8 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="CustomElements\RemoveCellElement.cs" />
-    <Compile Include="CustomElements\QuantityCellElement.cs" />
-    <Compile Include="CustomElements\ProductPhotoCellElement.cs" />
+    <Compile Include="CustomElements\GridQuantityElement.cs" />
+    <Compile Include="CustomElements\PhotoCellElement.cs" />
     <Compile Include="CustomControls\Views\InventoriesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -248,8 +248,9 @@
     </Compile>
     <Compile Include="Helpers\FilterHelper.cs" />
     <Compile Include="Helpers\GridControlCollection.cs" />
+    <Compile Include="Helpers\GridItemCollection.cs" />
     <Compile Include="Helpers\NodeBuilder.cs" />
-    <Compile Include="Helpers\Inventory.cs" />
+    <Compile Include="Helpers\GridItem.cs" />
     <Compile Include="Helpers\SortHelper.cs" />
     <Compile Include="Helpers\UsedFieldsHelper.cs" />
     <Compile Include="CustomForms\MainForm.cs">

@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Drawing;
-using Catalog.Common.Repository;
+using System.Data.Entity;
+
 using Telerik.WinControls.UI;
 
+using Catalog.Common.Repository;
 
 using TreeNodeList = System.Collections.Generic.SortedList<string, Telerik.WinControls.UI.RadTreeNode>;
 
@@ -112,12 +114,12 @@ namespace Catalog.Client
 		InitializeNodes(bool expanded, string defaultNodeName, Action<ProductTag> callback)
 		{
 			this.Callback = callback;
-			var categories = Repository.Context.ProductCategories
-			.Include("ProductSubcategories");
-			//.Expand(p => p.ProductSubcategories);
+			var categories = Repository.Context.Categories
+												.Include(p => p.Subcategories);
+
 			// Common products
 			var commonTag = ProductTag.Zero;
-			commonTag.Count = MainRepository.ProductInventoriesCache.Count;
+			commonTag.Count = MainRepository.InventoriesCache.Count;
 			commonTag.Name = defaultNodeName;
 
 			AddNode(commonTag, "_All", commonTag.ToString(), expanded);
@@ -127,21 +129,32 @@ namespace Catalog.Client
 			{
 				//Subcategory
 				var radTreeNodes = new List<RadTreeNode>();
-				var categoryTag = new ProductTag(category.ProductCategoryID)
+				var categoryTag = new ProductTag(category.CategoryID)
 				{
 					Name = category.Name
 				};
 
-				foreach (var subcat in category.ProductSubcategories)
+				List<Int32> ignoreList = new List<Int32>();
+
+				foreach (var subcat in category.Subcategories)
 				{
-					var tag = new ProductTag(subcat.ProductCategoryID, subcat.ProductSubcategoryID)
+					if (subcat.ChildSubcategoryID.HasValue)
+					{
+						ignoreList.Add(subcat.ChildSubcategoryID.Value);
+
+						//radTreeNodes.Add(new RadTreeNode { 
+							
+						//});
+					}
+
+					var tag = new ProductTag(subcat.CategoryID, subcat.SubcategoryID)
 					{
 						Name = subcat.Name
 					};
 
-					tag.Count = MainRepository.ProductInventoriesCache
-												.Count(p => p.ProductSubcategoryID == tag.SID);
-
+					tag.Count = MainRepository.InventoriesCache
+												.Count(p => p.SubcategoryID == tag.SID);
+					
 					radTreeNodes.Add(new RadTreeNode
 					{
 						Tag = tag,
@@ -155,17 +168,17 @@ namespace Catalog.Client
 				}
 				++index;
 				// Category
-				AddNode(categoryTag, category.Name, categoryTag.ToString(), radTreeNodes, expanded);
+				AddRootNode(categoryTag, category.Name, categoryTag.ToString(), radTreeNodes, expanded);
 			}
 			return TreeNodes;
 		}
 
 		private RadTreeNode AddNode(ProductTag tag, string name, string value, bool expanded)
 		{
-			return AddNode(tag, name, value, null, expanded);
+			return AddRootNode(tag, name, value, null, expanded);
 		}
 
-		private RadTreeNode AddNode(
+		private RadTreeNode AddRootNode(
 			ProductTag tag,
 			string name,
 			string value,
@@ -177,7 +190,6 @@ namespace Catalog.Client
 			Callback(tag);
 			if (children != null)
 			{
-
 				children.ForEach(node => Callback(node.Tag as ProductTag));
 				topNode = new RadTreeNode(name, children.ToArray())
 				{

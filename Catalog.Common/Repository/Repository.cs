@@ -11,7 +11,7 @@ namespace Catalog.Common.Repository
 {
 	public abstract class Repository
 	{
-		public static ShopEntities Context => DatabaseManager.Context; 
+		public static CatalogContext Context => DatabaseManager.Context; 
 
 		static Repository()
 		{
@@ -73,15 +73,16 @@ namespace Catalog.Common.Repository
 				callback?.Invoke();
 			} catch (DbUpdateException dbe)
 			{
-				Debug.WriteLine($"1. Error occurred while saving changes: {dbe.Message}\n" +
+				Debug.WriteLine($"Error (1) occurred while saving changes: {dbe.Message}\n" +
 								$"StackTrace:\n{dbe.StackTrace}\n" +
 								$"Detailed message:\n{dbe.InnerException?.Message}");
 			}
 			catch (DbEntityValidationException ev)
 			{
+				Debug.WriteLine($"Error (2) occurred while saving changes: {ev.Message}\n");
 				foreach (var eve in ev.EntityValidationErrors)
 				{
-					Console.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:",
+					Debug.WriteLine("Entity of type \"{0}\" in state \"{1}\" has the following validation errors:",
 						eve.Entry.Entity.GetType().Name, eve.Entry.State);
 					foreach (var ve in eve.ValidationErrors)
 					{
@@ -93,7 +94,7 @@ namespace Catalog.Common.Repository
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine($"2. Error occurred while saving changes: {ex.Message}\n" +
+				Debug.WriteLine($"Error (3) occurred while saving changes: {ex.Message}\n" +
 								$"StackTrace:\n{ex.StackTrace}\n" +
 								$"Detailed message:\n{ex.InnerException?.Message}");
 

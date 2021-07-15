@@ -90,27 +90,28 @@
 
 	public static class MESSAGE
 	{
+		public struct Web
+		{
+			public const string NO_CONNECTION = "Отсутствует подключение к сети! Повторите позже.";
+		}
+
 		public struct Mail
 		{
 			public const string SUBJECT = "Отправлено с ТД СБМ-Волга Каталог";
-
 			public const string BODY = "Заказ #{0}\nID клиента: {1}\n";
-
 			public const string ERROR = "Failed to post to {0}\nReason: {1}\nResponse: {2}";
 		}
 
 		public struct Gui
 		{
+			public const string COMPANY_INFO = "{0} Центр оптовой торговли ТД СБМ-Волга©, Россия, г. Нижний Новгород";
+			public const string COMPANY_MAIL = "info@sbm-nn.ru";
+			public const string UPDATE_STATUS = "<html>Последнее обновление: <b>{0}</b>";
 			public const string ORDERS_STATUS_TEMPLATE = "<html>В корзине <b>{0}</b> позиций на сумму <b>{1}</b>";
-
 			public const string HURRY_WARNING = "Загрузка данных еще не завершена! Пожалуйста, ждите завершения.";
-
 			public const string CONFIRM_ACTION = "Хотите продолжить?";
-
 			public const string EXPORT_ERROR = "Закройте файл и повтрите\n{0}\n{1}";
-
 			public const string ON_SUCCESS_TRANSACTION = "Заказ №{0} принят.\nЖдите подтверждение оператора.";
-
 			public const string ON_CONNECT_ERROR_TRANSACTION = "Отсутствует соединение с сетью, пожалуйста, подключитесь к сети и повторите попытку снова!";
 		}
 
@@ -153,7 +154,10 @@
 
 	public struct GUI
 	{
+		public const short COLLAPSIBLE_PANEL_MAX_WIDTH = 600;
+		public const short COLLAPSIBLE_PANEL_MIN_WIDTH = 200;
+		public const short DEFAULT_COLLAPSIBLE_PANEL_WIDTH = 300;
+		public const short DEFAULT_COLLAPSIBLE_PANEL_MIN_WIDTH = 35;
 		public const string SAVE_FILTER = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*";
-
 	}
 }

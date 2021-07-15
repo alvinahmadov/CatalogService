@@ -6,7 +6,7 @@ using Catalog.Common.Repository;
 
 namespace Catalog.Common.Service
 {
-	public partial class Product : EntityModel
+	public partial class Product : Entity
 	{
 		public Product(
 			int productId,
@@ -31,26 +31,27 @@ namespace Catalog.Common.Service
 			this.SpecialOfferProducts = new HashSet<SpecialOfferProduct>();
 		}
 
-		public override void Save(bool isAddingItem = true, bool commit = false)
+		public static void SaveRange(List<Product> range, Boolean commit = true)
 		{
-			try
-			{
-				if (isAddingItem)
-				{
-					Repository.Repository.Context.Products.Add(this);
-				}
+			Repository.Repository.Context.Products.AddRange(range);
 
-				if (commit)
-				{
-					Debug.WriteLine("Commit at Product.Save");
-					Commit();
-				}
-			}
-			catch { }
+			if (commit)
+				Commit();
 		}
 
-		public override bool Update(object entity, bool commit = false)
+		public override void Save(Boolean commit = false)
 		{
+			Repository.Repository.Context.Products.Add(this);
+
+			if (commit)
+				Commit();
+		}
+
+		public override Boolean Update(in Object entity)
+		{
+			if (entity is null)
+				return false;
+
 			var other = entity as Product;
 
 			if (!Equals(other))
@@ -72,22 +73,12 @@ namespace Catalog.Common.Service
 		public override void Delete()
 		{
 			Repository.Repository.Context.Products.Remove(this);
-			Save(false, true);
-		}
-
-		public override String ToString()
-		{
-			return $"Product <[" +
-			$"ProductID: {this.ProductID}, " +
-			$"ArticleNumber: {this.ArticleNumber}, " +
-			$"Code: {this.Code}, Brand: {this.Brand}, " +
-			$"Name: {this.Name}, Price: {this.Price}" +
-			$"]>";
+			Commit();
 		}
 
 		public override Boolean Equals(Object obj)
 		{
-			if (obj == null)
+			if (obj is null)
 				return false;
 
 			var other = obj as Product;
@@ -103,7 +94,21 @@ namespace Catalog.Common.Service
 
 		public override Int32 GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.ProductID.GetHashCode()
+			^ this.ArticleNumber.GetHashCode()
+			^ this.Code.GetHashCode();
+		}
+
+		public override String ToString()
+		{
+			return $"Product ({this.ID}) <[" +
+			$"ProductID: {this.ProductID}, " +
+			$"ArticleNumber: {this.ArticleNumber}, " +
+			$"Code: {this.Code}, " +
+			$"Brand: {this.Brand}, " +
+			$"Name: {this.Name}, " +
+			$"Price: {this.Price}" +
+			$"]>";
 		}
 	}
 }

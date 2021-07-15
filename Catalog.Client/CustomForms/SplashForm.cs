@@ -31,7 +31,6 @@ namespace Catalog.Client
 			this.logoBox.ContextMenuEnabled = false;
 			this.OperationMode = mode;
 			this.TopLevel = true;
-			WebWorker.LoggingCallback = UpdateStatus;
 			if (message != null)
 				this.StatusLabel.Text = message;
 		}
@@ -69,28 +68,11 @@ namespace Catalog.Client
 				UpdateStatus("Отсутствует подключение к сети!");
 				Thread.Sleep(1500);
 			}
+
 			try
 			{
-				WebWorker.UpdateStatus = Common.UpdateStatus.Started;
-				WebWorker.InitSettings();
-				WebWorker.InitProductCategories();
-				WebWorker.InitProductSubcategories();
-				var productCount = WebWorker.InitProducts();
-				var settings = Repository.Context.Settings.SingleOrDefault();
-
-				if (settings.LoadImage
-					&& WebWorker.HasConnection
-					&& !WebWorker.PhotosUpdating)
-				{
-					UpdateStatus("Обновление картинок...");
-					Task.Run(WebWorker.InitProductPhotos);
-				}
-
-				MainRepository.ResetCache(CacheType.INVENTORY);
-
-				UpdateStatus($"<html>Обновлено <b>{productCount}</b> товаров");
-
-				WebWorker.UpdateStatus = Common.UpdateStatus.Finished;
+				WebWorker.LoggingCallback = UpdateStatus;
+				WebWorker.LoadData();
 			}
 			catch (Exception ex)
 			{

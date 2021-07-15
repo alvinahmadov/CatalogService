@@ -17,15 +17,17 @@ namespace Catalog.Common.Service
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Settings()
         {
-            this.UpdateInterval = 30;
             this.AskConfirmation = true;
             this.LoadImage = true;
+            this.UpdateInterval = 30;
+            this.LeftPanelWidth = GUI.DEFAULT_COLLAPSIBLE_PANEL_WIDTH;
         }
     
         public int ID { get; set; }
-        public int UpdateInterval { get; set; }
         public bool AskConfirmation { get; set; }
         public bool LoadImage { get; set; }
+        public int UpdateInterval { get; set; }
+        public short LeftPanelWidth { get; set; }
         public System.DateTime ModifiedDate { get; set; }
     }
 }

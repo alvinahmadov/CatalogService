@@ -26,16 +26,16 @@ namespace Catalog.Common.Repository
 			return transactionHistories;
 		}
 
-		public static void GetProductInventories(Action<DbQuery<ProductInventory>> action)
+		public static void GetProductInventories(Action<DbQuery<Inventory>> action)
 		{
 			ExecuteQueryAsync(GetProductInventoriesAsync(), action);
 		}
 
-		private static async Task<DbQuery<ProductInventory>> GetProductInventoriesAsync()
+		private static async Task<DbQuery<Inventory>> GetProductInventoriesAsync()
 		{
 			return await Task.Run(() =>
-				Context.ProductInventories
-				.Include(p => p.Product) as DbQuery<ProductInventory>);
+				Context.Inventories
+				.Include(p => p.Product) as DbQuery<Inventory>);
 		}
 
 

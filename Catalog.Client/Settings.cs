@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable IDE0044 // Add readonly modifier
+
+using System;
 using System.Linq;
 
 using Catalog.Common.Repository;
@@ -10,44 +12,72 @@ namespace Catalog.Client.Properties
 {
 	internal sealed partial class Settings
 	{
-		public bool AskConfirmation
+		public Int32 UpdateInterval
 		{
-			get => dbSettings.AskConfirmation;
+			get => Database.UpdateInterval;
 			set
 			{
-				if (dbSettings.AskConfirmation != value)
-					dbSettings.AskConfirmation = value;
+				if (Database.UpdateInterval != value)
+					Database.UpdateInterval = value;
 			}
 		}
 
-		public bool LoadImage
+		public Int16 LeftPanelWidth
 		{
-			get => dbSettings.LoadImage;
+			get => Database.LeftPanelWidth;
 			set
 			{
-				if (dbSettings.LoadImage != value)
-					dbSettings.LoadImage = value;
+				var min = Common.GUI.COLLAPSIBLE_PANEL_MIN_WIDTH;
+				var max = Common.GUI.COLLAPSIBLE_PANEL_MAX_WIDTH;
+
+				if (dbSettings.LeftPanelWidth != value)
+					if (value >= min && value <= max)
+					{
+						Database.LeftPanelWidth = value;
+					}
 			}
 		}
 
-		public int UpdateInterval
+		public Boolean AskConfirmation
 		{
-			get => dbSettings.UpdateInterval;
+			get => Database.AskConfirmation;
 			set
 			{
-				if (dbSettings.UpdateInterval != value)
-					dbSettings.UpdateInterval = value;
+				if (Database.AskConfirmation != value)
+					Database.AskConfirmation = value;
+			}
+		}
+
+		public Boolean LoadImage
+		{
+			get => Database.LoadImage;
+			set
+			{
+				if (Database.LoadImage != value)
+					Database.LoadImage = value;
 			}
 		}
 
 		public void Commit()
 		{
 			dbSettings.ModifiedDate = DateTime.Now;
-			EntityModel.Commit();
+			Entity.Commit();
 		}
 
-		private DatabaseSettings dbSettings = Repository.Context
-																.Settings
-																.SingleOrDefault();
+		public DatabaseSettings Database
+		{
+			get
+			{
+				if (dbSettings == null)
+				{
+					dbSettings = new Common.Service.Settings(1);
+					dbSettings.Save(true);
+				}
+
+				return dbSettings;
+			}
+		}
+
+		private DatabaseSettings dbSettings = Repository.Context.Settings.SingleOrDefault();
 	}
 }

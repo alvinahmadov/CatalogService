@@ -4,45 +4,95 @@ using System.Threading;
 
 namespace Catalog.Common
 {
-	public class UpdateTimer
+	public static class UpdateTimer
 	{
 		/// <summary>
 		/// As minutes (ex. 30, 45)
 		/// </summary>
-		static Int64 DueTime { get; set; }
-
-		static Int64 Period { get; set; }
-
-		public UpdateTimer(Int32 interval, Action updateCallback)
+		public static Int32 DueTime
 		{
-			DueTime = ConvertMinutesToMilliseconds(interval);
-			Period = ConvertMinutesToMilliseconds(interval);
-			this.updateCallback = updateCallback;
+			get => _dueTime;
+			set
+			{
+				if (value != 0)
+					if (_dueTime != value)
+						_dueTime = value;
+			}
 		}
 
-		public UpdateTimer(Int32 dueTime, Int32 period, Action updateCallback)
+		public static Int32 Period
 		{
-			DueTime = ConvertMinutesToMilliseconds(dueTime);
-			Period = ConvertMinutesToMilliseconds(period);
-			this.updateCallback = updateCallback;
+			get => _period;
+			set
+			{
+				if (value != 0)
+					if (_period != value)
+						_period = value;
+			}
 		}
 
+		public static Timer Timer { get => timer; set { if (timer != value) timer = value; } }
 
-		public void Update(Object state)
+		public static bool IsUpdating { get; set; } = false;
+
+		public static bool IsEnabled { get => Timer != null; }
+
+		public static Action Callback
 		{
+			get => updateCallback;
+			set
+			{
+				if (updateCallback != value && value != null)
+					updateCallback = value;
+			}
+		}
+
+		public static void Update(Object state)
+		{
+			if (IsUpdating)
+				return;
+
+			IsUpdating = true;
+
 			updateCallback?.Invoke();
+
+			IsUpdating = false;
 		}
 
-		public void Start()
+		public static void Start()
+		{
+			if (Timer == null)
+				if (DueTime != 0 || Period != 0)
+				{
+					var dueTime = ConvertMinutesToMilliseconds(DueTime);
+					var period = ConvertMinutesToMilliseconds(Period);
+					Timer = new Timer(new TimerCallback(Update), null, DueTime, Period);
+				}
+		}
+
+		public static void Change(Int32 interval)
+		{
+			Change(interval, interval);
+		}
+
+		public static void Change(Int32 dueTime, Int32 period)
 		{
 			if (DueTime != 0 || Period != 0)
-				this.timer = new Timer(new TimerCallback(Update), null, DueTime, Period);
+			{
+				DueTime = dueTime;
+				Period = period;
+
+				var dueTime_ = ConvertMinutesToMilliseconds(DueTime);
+				var period_ = ConvertMinutesToMilliseconds(Period);
+
+				Timer?.Change(dueTime_, period_);
+			}
 		}
 
-		public void Stop() 
+		public static void Stop()
 		{
-			updateCallback = null;
-			this.timer?.Dispose();
+			Timer?.Dispose();
+			Timer = null;
 		}
 
 		private static Int64 ConvertMinutesToMilliseconds(int minutes)
@@ -55,8 +105,12 @@ namespace Catalog.Common
 			return (Int64)TimeSpan.FromSeconds(seconds).TotalMilliseconds;
 		}
 
-		private Action updateCallback;
+		private static Action updateCallback;
 
-		private Timer timer;
+		private static Timer timer = null;
+
+		private static Int32 _dueTime;
+
+		private static Int32 _period;
 	}
 }

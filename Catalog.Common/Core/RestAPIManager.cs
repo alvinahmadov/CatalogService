@@ -47,7 +47,7 @@ namespace Catalog.Common
 		public async static Task<List<List<JsonObject>>> FetchProducts()
 		{
 			var responses = new List<List<JsonObject>>();
-			foreach (var category in MainRepository.ProductCategoriesCache)
+			foreach (var category in MainRepository.CategoriesCache)
 			{
 				var parameters = new KVParams
 				{

@@ -4,21 +4,21 @@ namespace Catalog.Common.Repository
 {
 	public static class DatabaseManager
 	{
-		public static ShopEntities Context 
+		public static CatalogContext Context 
 		{
 			get {
 				if (dbContext == null)
-					dbContext = new ShopEntities();
+					dbContext = new CatalogContext();
 				return dbContext;
 			}
 		}
 
 		static DatabaseManager()
 		{
-			dbContext = new ShopEntities();
+			dbContext = new CatalogContext();
 		}
 
-		private static ShopEntities dbContext;
+		private static CatalogContext dbContext;
 	}
 
 }

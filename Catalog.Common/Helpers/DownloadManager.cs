@@ -31,9 +31,15 @@ namespace Catalog.Common
 				var data = this.WebClient.DownloadData($"{this.BaseAddress}{filename}");
 				callback(data);
 			}
-			catch
+			catch (WebException we)
 			{
-				errorMessage = String.Format(MESSAGE.Mail.ERROR, filename, "", "");
+				errorMessage = String.Format(MESSAGE.Mail.ERROR, filename, we.Message, we.Response);
+				Debug.WriteLine(errorMessage);
+			}
+			catch (Exception ex)
+			{
+				errorMessage = String.Format(MESSAGE.Mail.ERROR, filename, ex.Message, ex.StackTrace);
+				Debug.WriteLine(errorMessage);
 			}
 		}
 

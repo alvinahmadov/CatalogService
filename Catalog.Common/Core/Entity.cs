@@ -3,32 +3,32 @@ using System.Diagnostics;
 
 namespace Catalog.Common.Service
 {
-	public abstract class EntityModel : ISavableObject
+	public abstract class Entity : IEntity
 	{
-		public static void Commit(bool async = false)
+		public static void Commit(Boolean async = false)
 		{
-			Debug.WriteLine("Committing");
 			if (async)
 				Repository.Repository.SaveChangesAsync();
 			else
 				Repository.Repository.SaveChanges();
 		}
 
+		public virtual void Save(Boolean commit = false)
+		{
+			throw new NotImplementedException();
+		}
+
+		public virtual Boolean Update(in Object entity)
+		{
+			throw new NotImplementedException();
+		}
+
 		public virtual void Cancel()
 		{
+			throw new NotImplementedException();
 		}
 
 		public virtual void Delete()
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual void Save(bool isAddingItem = true, bool commit = false)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual bool Update(object entity, bool commit = false)
 		{
 			throw new NotImplementedException();
 		}

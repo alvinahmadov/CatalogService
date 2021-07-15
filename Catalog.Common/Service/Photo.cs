@@ -12,7 +12,7 @@ namespace Catalog.Common.Service
     using System;
     using System.Collections.Generic;
     
-    public partial class ProductPhoto
+    public partial class Photo
     {
         public int ID { get; set; }
         public int ProductID { get; set; }

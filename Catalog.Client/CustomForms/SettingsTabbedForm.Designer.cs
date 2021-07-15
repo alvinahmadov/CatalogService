@@ -50,6 +50,8 @@
 			this.forgotLinkLabel = new System.Windows.Forms.LinkLabel();
 			this.registrationLink = new System.Windows.Forms.LinkLabel();
 			this.loginButton = new Telerik.WinControls.UI.RadButton();
+			this.radLeftPanelWithSpin = new Telerik.WinControls.UI.RadSpinEditor();
+			this.radLeftPanelWidthLabel = new Telerik.WinControls.UI.RadLabel();
 			passwordLabel = new Telerik.WinControls.UI.RadLabel();
 			usernameLabel = new Telerik.WinControls.UI.RadLabel();
 			updateIntervalLabel = new Telerik.WinControls.UI.RadLabel();
@@ -75,6 +77,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.usernameTextBoxControl)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.passwordTextBoxControl)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.loginButton)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.radLeftPanelWithSpin)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.radLeftPanelWidthLabel)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -132,7 +136,7 @@
 			this.radLoadImageLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
 			this.radLoadImageLabel.Location = new System.Drawing.Point(3, 171);
 			this.radLoadImageLabel.Name = "radLoadImageLabel";
-			this.radLoadImageLabel.Size = new System.Drawing.Size(335, 56);
+			this.radLoadImageLabel.Size = new System.Drawing.Size(335, 54);
 			this.radLoadImageLabel.TabIndex = 11;
 			this.radLoadImageLabel.Text = "Загружать изображения";
 			// 
@@ -146,7 +150,7 @@
 			this.radTabFormControl.SelectedTab = this.radCommonTab;
 			this.radTabFormControl.ShowNewTabButton = false;
 			this.radTabFormControl.ShowTabCloseButton = false;
-			this.radTabFormControl.Size = new System.Drawing.Size(526, 392);
+			this.radTabFormControl.Size = new System.Drawing.Size(526, 521);
 			this.radTabFormControl.TabHeight = 32;
 			this.radTabFormControl.TabIndex = 0;
 			this.radTabFormControl.TabSpacing = -1;
@@ -158,7 +162,7 @@
 			this.radCommonTab.Controls.Add(this.tableLayoutPanel2);
 			this.radCommonTab.Location = new System.Drawing.Point(1, 37);
 			this.radCommonTab.Name = "radCommonTab";
-			this.radCommonTab.Size = new System.Drawing.Size(524, 354);
+			this.radCommonTab.Size = new System.Drawing.Size(524, 483);
 			this.radCommonTab.Text = "Общее";
 			// 
 			// tableLayoutPanel3
@@ -168,7 +172,7 @@
 			this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
 			this.tableLayoutPanel3.Controls.Add(this.submitButton, 0, 0);
 			this.tableLayoutPanel3.Controls.Add(this.cancelButton, 1, 0);
-			this.tableLayoutPanel3.Location = new System.Drawing.Point(255, 288);
+			this.tableLayoutPanel3.Location = new System.Drawing.Point(258, 301);
 			this.tableLayoutPanel3.Name = "tableLayoutPanel3";
 			this.tableLayoutPanel3.RowCount = 1;
 			this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -217,16 +221,19 @@
 			this.tableLayoutPanel2.Controls.Add(this.radLoadImageCheckBox, 1, 3);
 			this.tableLayoutPanel2.Controls.Add(radConfirmationLabel, 0, 2);
 			this.tableLayoutPanel2.Controls.Add(this.radConfirmCheckBox, 1, 2);
+			this.tableLayoutPanel2.Controls.Add(this.radLeftPanelWithSpin, 1, 4);
+			this.tableLayoutPanel2.Controls.Add(this.radLeftPanelWidthLabel, 0, 4);
 			this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Top;
 			this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
 			this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-			this.tableLayoutPanel2.RowCount = 4;
+			this.tableLayoutPanel2.RowCount = 5;
 			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 57F));
 			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 53F));
 			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 58F));
-			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
+			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 55F));
 			this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-			this.tableLayoutPanel2.Size = new System.Drawing.Size(524, 230);
+			this.tableLayoutPanel2.Size = new System.Drawing.Size(524, 295);
 			this.tableLayoutPanel2.TabIndex = 1;
 			// 
 			// updateItervalSpinControl
@@ -238,6 +245,29 @@
 			this.updateItervalSpinControl.Size = new System.Drawing.Size(177, 29);
 			this.updateItervalSpinControl.TabIndex = 2;
 			this.updateItervalSpinControl.TextAlignment = System.Windows.Forms.HorizontalAlignment.Center;
+			// 
+			// radLeftPanelWithSpin
+			// 
+			this.radLeftPanelWithSpin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+			this.radLeftPanelWithSpin.Font = new System.Drawing.Font("Segoe UI", 12F);
+			this.radLeftPanelWithSpin.Location = new System.Drawing.Point(344, 248);
+			this.radLeftPanelWithSpin.Name = "radLeftPanelWithSpin";
+			this.radLeftPanelWithSpin.Size = new System.Drawing.Size(177, 27);
+			this.radLeftPanelWithSpin.TabIndex = 13;
+			this.radLeftPanelWithSpin.TextAlignment = System.Windows.Forms.HorizontalAlignment.Center;
+			this.radLeftPanelWithSpin.Maximum = Common.GUI.COLLAPSIBLE_PANEL_MAX_WIDTH;
+			this.radLeftPanelWithSpin.Minimum = Common.GUI.COLLAPSIBLE_PANEL_MIN_WIDTH;
+			// 
+			// radLeftPanelWidthLabel
+			// 
+			this.radLeftPanelWidthLabel.AutoSize = false;
+			this.radLeftPanelWidthLabel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.radLeftPanelWidthLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+			this.radLeftPanelWidthLabel.Location = new System.Drawing.Point(3, 231);
+			this.radLeftPanelWidthLabel.Name = "radLeftPanelWidthLabel";
+			this.radLeftPanelWidthLabel.Size = new System.Drawing.Size(335, 61);
+			this.radLeftPanelWidthLabel.TabIndex = 14;
+			this.radLeftPanelWidthLabel.Text = "Ширина левой панели";
 			// 
 			// updateButton
 			// 
@@ -260,7 +290,7 @@
 			this.radLoadImageCheckBox.DisplayStyle = Telerik.WinControls.DisplayStyle.Image;
 			this.radLoadImageCheckBox.Location = new System.Drawing.Point(413, 171);
 			this.radLoadImageCheckBox.Name = "radLoadImageCheckBox";
-			this.radLoadImageCheckBox.Size = new System.Drawing.Size(38, 56);
+			this.radLoadImageCheckBox.Size = new System.Drawing.Size(38, 54);
 			this.radLoadImageCheckBox.TabIndex = 12;
 			this.radLoadImageCheckBox.ToggleState = Telerik.WinControls.Enumerations.ToggleState.On;
 			// 
@@ -282,7 +312,7 @@
 			this.radAuthTab.Controls.Add(this.tableLayoutPanel1);
 			this.radAuthTab.Location = new System.Drawing.Point(1, 37);
 			this.radAuthTab.Name = "radAuthTab";
-			this.radAuthTab.Size = new System.Drawing.Size(524, 354);
+			this.radAuthTab.Size = new System.Drawing.Size(524, 483);
 			this.radAuthTab.Text = "Авторизация";
 			// 
 			// tableLayoutPanel1
@@ -309,7 +339,7 @@
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 55F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 66F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(524, 354);
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(524, 483);
 			this.tableLayoutPanel1.TabIndex = 1;
 			// 
 			// usernameTextBoxControl
@@ -377,7 +407,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelButton;
-			this.ClientSize = new System.Drawing.Size(526, 392);
+			this.ClientSize = new System.Drawing.Size(526, 521);
 			this.ControlBox = false;
 			this.Controls.Add(this.radTabFormControl);
 			this.MaximizeBox = false;
@@ -412,6 +442,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.usernameTextBoxControl)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.passwordTextBoxControl)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.loginButton)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.radLeftPanelWithSpin)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.radLeftPanelWidthLabel)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this)).EndInit();
 			this.ResumeLayout(false);
 
@@ -437,5 +469,7 @@
 		private Telerik.WinControls.UI.RadCheckBox radLoadImageCheckBox;
 		private Telerik.WinControls.UI.RadCheckBox radConfirmCheckBox;
 		private Telerik.WinControls.UI.RadLabel radLoadImageLabel;
+		private Telerik.WinControls.UI.RadSpinEditor radLeftPanelWithSpin;
+		private Telerik.WinControls.UI.RadLabel radLeftPanelWidthLabel;
 	}
 }

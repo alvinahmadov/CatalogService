@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 using Catalog.Common.Repository;
 
 namespace Catalog.Common.Service
 {
-	public partial class ShoppingCartItem : EntityModel
+	public partial class ShoppingCartItem : Entity
 	{
 		public ShoppingCartItem(ShoppingCart cart, Product product)
 		{
@@ -19,32 +20,33 @@ namespace Catalog.Common.Service
 			ModifiedDate = DateTime.Now;
 		}
 
-		public override void Save(bool isAddingItem = true, bool commit = false)
+		public static void SaveRange(List<ShoppingCartItem> range, Boolean commit = true)
 		{
-			try
-			{
-				if (isAddingItem)
-				{
-					Repository.Repository.Context.ShoppingCartItems.Add(this);
-				}
+			Repository.Repository.Context.ShoppingCartItems.AddRange(range);
 
-				if (commit)
-				{
-					Debug.WriteLine("Commit at ShoppingCartItems.Save");
-					Commit();
-				}
-			}
-			catch { }
+			if (commit)
+				Commit();
 		}
 
-		public override bool Update(object entity, bool save = false)
+		public override void Save(bool commit = false)
 		{
-			var cartItem = entity as ShoppingCartItem;
+			Repository.Repository.Context.ShoppingCartItems.Add(this);
 
-			if (this.Quantity != cartItem.Quantity && this.UnitPrice != cartItem.UnitPrice)
+			if (commit)
+				Commit();
+		}
+
+		public override Boolean Update(in Object entity)
+		{
+			if (entity == null)
+				return false;
+
+			var other = entity as ShoppingCartItem;
+
+			if (!Equals(other))
 			{
-				this.Quantity = cartItem.Quantity;
-				this.UnitPrice = cartItem.UnitPrice;
+				this.Quantity = other.Quantity;
+				this.UnitPrice = other.UnitPrice;
 				this.ModifiedDate = DateTime.Now;
 
 				return true;
@@ -56,7 +58,33 @@ namespace Catalog.Common.Service
 		public override void Delete()
 		{
 			Repository.Repository.Context.ShoppingCartItems.Remove(this);
-			Save(false, true);
+			Commit();
+		}
+
+		public override Boolean Equals(Object obj)
+		{
+			var entity = obj as ShoppingCartItem;
+
+			var equal = (this.ProductID == entity.ProductID)
+					 && (this.Quantity == entity.Quantity)
+					 && (this.UnitPrice == entity.UnitPrice);
+			return equal;
+		}
+
+		public override Int32 GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
+		public override String ToString()
+		{
+			return $"ShoppingCartItem ({this.ID}) <[" +
+			$"ProductID: {this.ProductID}, " +
+			$"Quantity: {this.Quantity}, " +
+			$"UnitPrice: {this.UnitPrice}, " +
+			$"DateCreated: {this.DateCreated}, " +
+			$"ModifiedDate: {this.ModifiedDate}" +
+			$"]>";
 		}
 	}
 }
