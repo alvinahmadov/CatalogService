@@ -51,7 +51,7 @@ A specialized utility library that acts as a wrapper around **RestSharp**. It si
 ### Installation
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-repo/CatalogService.git
+    git clone https://github.com/alvinahmadov/CatalogService.git
     ```
 2.  Open the solution file `Catalog.sln` in Visual Studio.
 3.  Restore NuGet packages:
